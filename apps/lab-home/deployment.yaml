@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: lab-home
-          image: dariomr8/lab-home:latest
+          image: dariomr8/lab-home:1.0.1
           ports:
             - containerPort: 80
           livenessProbe:
