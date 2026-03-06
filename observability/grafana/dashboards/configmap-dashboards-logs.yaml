@@ -1071,7 +1071,8 @@ data:
       "title": "Access logs",
       "uid": "access-logs",
       "version": 8
-    }  application-logs.json: |
+    }
+  application-logs.json: |
     {
       "annotations": {
         "list": [
