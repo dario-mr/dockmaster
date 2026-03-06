@@ -256,9 +256,9 @@ data:
     		}
     	}
 
-    	// All other JSON apps (e.g. Spring Boot apps like wordle-duel-service)
+    	// JSON apps (Spring Boot)
     	stage.match {
-    		selector = "{app!~\"^(grafana|kube-prometheus-stack-grafana|prometheus|kube-prometheus-stack-prometheus|alloy|wordle-duel-service-redis)$\"}"
+    		selector = "{app=~\"wordle-duel-service\"}"
 
     		stage.json {
     			expressions = {level = "level", logger = "logger_name", msg = "message", ts = "[\"@timestamp\"]", stack_trace = "stack_trace", trace_id = "traceId"}
