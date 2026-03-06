@@ -92,7 +92,7 @@ spec:
           uid: loki
           url: http://loki.observability.svc.cluster.local:3100
           access: proxy
-          isDefault: true
+          isDefault: false
     prometheus-node-exporter:
       enabled: true
     kube-state-metrics:
