@@ -17,6 +17,9 @@ export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
 
 # 2. Wait for node to be ready
 echo "[..] Waiting for node to be ready..."
+until kubectl get nodes &>/dev/null; do
+  sleep 2
+done
 kubectl wait --for=condition=Ready node --all --timeout=120s
 echo "[OK] Node ready"
 
