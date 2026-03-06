@@ -23,6 +23,7 @@ spec:
         - name: wordle-duel-service
           port: 8088
       middlewares:
+        - name: crowdsec-bouncer
         - name: strip-wordle-duel-service
         - name: default-headers
         - name: rate-limit-app

@@ -14,6 +14,8 @@ spec:
       - "--accesslog=true"
       - "--accesslog.format=json"
       - "--accesslog.filepath=/var/log/traefik/access.log"
+      - "--experimental.plugins.bouncer.modulename=github.com/maxlerebourg/crowdsec-bouncer-traefik-plugin"
+      - "--experimental.plugins.bouncer.version=v1.4.1"
     persistence:
       enabled: true
     volumes:
@@ -22,6 +24,9 @@ spec:
         type: hostPath
         path: /var/log/traefik
         hostPathType: DirectoryOrCreate
+      - name: crowdsec-bouncer-key
+        mountPath: /etc/traefik/crowdsec
+        type: secret
     ingressRoute:
       dashboard:
         enabled: false

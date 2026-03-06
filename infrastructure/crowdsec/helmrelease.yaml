@@ -1,0 +1,73 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: crowdsec
+  namespace: crowdsec
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: crowdsec
+      version: "0.22.1"
+      sourceRef:
+        kind: HelmRepository
+        name: crowdsec
+        namespace: flux-system
+  values:
+    container_runtime: containerd
+
+    lapi:
+      env:
+        - name: ENROLL_KEY
+          valueFrom:
+            secretKeyRef:
+              name: crowdsec-secrets
+              key: enroll-key
+        - name: ENROLL_INSTANCE_NAME
+          value: "dariolab-k3s"
+        - name: BOUNCER_KEY_traefik
+          valueFrom:
+            secretKeyRef:
+              name: crowdsec-secrets
+              key: bouncer-key
+      persistentVolume:
+        data:
+          enabled: true
+          storageClassName: local-path
+          size: 1Gi
+        config:
+          enabled: true
+          storageClassName: local-path
+          size: 100Mi
+      resources:
+        limits:
+          memory: 256Mi
+        requests:
+          cpu: 50m
+          memory: 128Mi
+
+    agent:
+      additionalAcquisition:
+        - source: file
+          filenames:
+            - /var/log/traefik/access.log
+          labels:
+            type: traefik
+      volumes:
+        - name: traefik-logs
+          hostPath:
+            path: /var/log/traefik
+            type: DirectoryOrCreate
+      volumeMounts:
+        - name: traefik-logs
+          mountPath: /var/log/traefik
+          readOnly: true
+      env:
+        - name: COLLECTIONS
+          value: "crowdsecurity/traefik crowdsecurity/http-cve crowdsecurity/base-http-scenarios"
+      resources:
+        limits:
+          memory: 256Mi
+        requests:
+          cpu: 50m
+          memory: 128Mi
