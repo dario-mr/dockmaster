@@ -1146,7 +1146,7 @@ data:
               },
               "direction": "backward",
               "editorMode": "code",
-              "expr": "{job=\"pod_logs\", app=~\"$app\", level=~\"(?i)$level\"}\n| json\n| trace_id=~\"^${traceId}$\"\n|~ \"(?i)(?:${search:regex}|^$)\"\n| line_format `\n{{- if .logger }}{{ .logger }} - {{ end -}}\n{{- .msg -}}\n{{- if .Failed }}, Failed={{ .Failed }}{{ end -}}\n{{- if .Scanned }} Scanned={{ .Scanned }}{{ end -}}\n{{- if .Updated }} Updated={{ .Updated }}{{ end -}}\n{{- if .notify }} notify={{ .notify }}{{ end -}}\n{{- if .component_id }}{{ printf \"\\ncomponent_id=%s\" .component_id }}{{ end -}}\n{{- if .node_id }}{{ printf \"\\nnode_id=%s\" .node_id }}{{ end -}}\n{{- if .error }}{{ printf \"\\nerror=%s\" .error }}{{- if .query }}{{ printf \"\\nquery=%s\" .query }}{{ end -}}{{ end -}}\n`",
+              "expr": "{job=\"pod_logs\", namespace=~\"$namespace\", app=~\"$app\", level=~\"(?i)$level\"}\n| json\n| trace_id=~\"^${traceId}$\"\n|~ \"(?i)(?:${search:regex}|^$)\"\n| line_format `\n{{- if .logger }}{{ .logger }} - {{ end -}}\n{{- .msg -}}\n{{- if .Failed }}, Failed={{ .Failed }}{{ end -}}\n{{- if .Scanned }} Scanned={{ .Scanned }}{{ end -}}\n{{- if .Updated }} Updated={{ .Updated }}{{ end -}}\n{{- if .notify }} notify={{ .notify }}{{ end -}}\n{{- if .component_id }}{{ printf \"\\ncomponent_id=%s\" .component_id }}{{ end -}}\n{{- if .node_id }}{{ printf \"\\nnode_id=%s\" .node_id }}{{ end -}}\n{{- if .error }}{{ printf \"\\nerror=%s\" .error }}{{- if .query }}{{ printf \"\\nquery=%s\" .query }}{{ end -}}{{ end -}}\n`",
               "queryType": "range",
               "refId": "JSON apps"
             }
@@ -1190,7 +1190,7 @@ data:
                 "uid": "loki"
               },
               "editorMode": "code",
-              "expr": "{job=\"pod_logs\", app=~\"$app\", level=~\"(?i)error\"}\n| json\n| line_format `\n{{- if .logger }}{{ .logger }} - {{ end -}}\n{{- .msg -}}\n{{- if .Failed }}, Failed={{ .Failed }}{{ end -}}\n{{- if .Scanned }} Scanned={{ .Scanned }}{{ end -}}\n{{- if .Updated }} Updated={{ .Updated }}{{ end -}}\n{{- if .notify }} notify={{ .notify }}{{ end -}}\n{{- if .component_id }}{{ printf \"\\ncomponent_id=%s\" .component_id }}{{ end -}}\n{{- if .node_id }}{{ printf \"\\nnode_id=%s\" .node_id }}{{ end -}}\n{{- if .error }}{{ printf \"\\nerror=%s\" .error }}{{- if .query }}{{ printf \"\\nquery=%s\" .query }}{{ end -}}{{ end -}}\n`",
+              "expr": "{job=\"pod_logs\", namespace=~\"$namespace\", app=~\"$app\", level=~\"(?i)error\"}\n| json\n| line_format `\n{{- if .logger }}{{ .logger }} - {{ end -}}\n{{- .msg -}}\n{{- if .Failed }}, Failed={{ .Failed }}{{ end -}}\n{{- if .Scanned }} Scanned={{ .Scanned }}{{ end -}}\n{{- if .Updated }} Updated={{ .Updated }}{{ end -}}\n{{- if .notify }} notify={{ .notify }}{{ end -}}\n{{- if .component_id }}{{ printf \"\\ncomponent_id=%s\" .component_id }}{{ end -}}\n{{- if .node_id }}{{ printf \"\\nnode_id=%s\" .node_id }}{{ end -}}\n{{- if .error }}{{ printf \"\\nerror=%s\" .error }}{{- if .query }}{{ printf \"\\nquery=%s\" .query }}{{ end -}}{{ end -}}\n`",
               "queryType": "range",
               "refId": "A"
             }
@@ -1298,7 +1298,7 @@ data:
                 "uid": "loki"
               },
               "editorMode": "code",
-              "expr": "sum by (app) (rate({job=\"pod_logs\", app=~\"$app\"}[$__interval]))",
+              "expr": "sum by (app) (rate({job=\"pod_logs\", namespace=~\"$namespace\", app=~\"$app\"}[$__interval]))",
               "legendFormat": "{{app}}",
               "queryType": "range",
               "refId": "A"
@@ -1393,7 +1393,7 @@ data:
                 "uid": "loki"
               },
               "editorMode": "code",
-              "expr": "sum by (app) (rate({job=\"pod_logs\", app=~\"$app\", level=~\"(?i)error\"}[$__interval]))",
+              "expr": "sum by (app) (rate({job=\"pod_logs\", namespace=~\"$namespace\", app=~\"$app\", level=~\"(?i)error\"}[$__interval]))",
               "legendFormat": "{{app}}",
               "queryType": "range",
               "refId": "A"
@@ -1488,7 +1488,7 @@ data:
                 "uid": "loki"
               },
               "editorMode": "code",
-              "expr": "count by (app) (count_over_time({job=\"pod_logs\", app=~\"$app\"}[5m]))",
+              "expr": "count by (app) (count_over_time({job=\"pod_logs\", namespace=~\"$namespace\", app=~\"$app\"}[5m]))",
               "legendFormat": "{{app}}",
               "queryType": "range",
               "refId": "A"
