@@ -30,7 +30,8 @@ docs/                  Documentation
 2. **Prepare secrets:**
    ```bash
    cp secrets/wordle-duel-service-secrets.template.yaml secrets/wordle-duel-service-secrets.yaml
-   # Edit secrets/wordle-duel-service-secrets.yaml with real values
+   cp secrets/observability-secrets.template.yaml secrets/observability-secrets.yaml
+   # Edit secrets with real values
    ```
 
 3. **Run bootstrap:**
@@ -48,6 +49,7 @@ docs/                  Documentation
    ```bash
    kubectl get pods -n apps
    flux get kustomizations
+   flux get kustomizations --watch
    ```
 
 See [docs/secrets-inventory.md](docs/secrets-inventory.md) for all required secret values.

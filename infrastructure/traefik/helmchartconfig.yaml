@@ -11,8 +11,17 @@ spec:
       - "--certificatesresolvers.letsencrypt.acme.tlschallenge=true"
       - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
       - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+      - "--accesslog=true"
+      - "--accesslog.format=json"
+      - "--accesslog.filepath=/var/log/traefik/access.log"
     persistence:
       enabled: true
+    volumes:
+      - name: access-logs
+        mountPath: /var/log/traefik
+        type: hostPath
+        path: /var/log/traefik
+        hostPathType: DirectoryOrCreate
     ingressRoute:
       dashboard:
         enabled: false

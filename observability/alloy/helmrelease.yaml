@@ -1,0 +1,34 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: alloy
+  namespace: observability
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: alloy
+      version: "0.*"
+      sourceRef:
+        kind: HelmRepository
+        name: grafana
+        namespace: flux-system
+  values:
+    alloy:
+      configMap:
+        create: false
+        name: alloy-config
+        key: config.alloy
+      mounts:
+        extra:
+          - name: traefik-logs
+            mountPath: /var/log/traefik
+            readOnly: true
+    controller:
+      type: daemonset
+      volumes:
+        extra:
+          - name: traefik-logs
+            hostPath:
+              path: /var/log/traefik
+              type: DirectoryOrCreate

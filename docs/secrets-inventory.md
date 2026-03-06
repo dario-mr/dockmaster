@@ -17,6 +17,17 @@ All secrets required by the 4 in-scope apps.
 
 **Template:** `secrets/wordle-duel-service-secrets.template.yaml`
 
+## Observability
+
+**Secret name:** `grafana-admin-secret` (namespace: `observability`)
+
+| Key              | Description               | Source         |
+|------------------|---------------------------|----------------|
+| `admin-user`     | Grafana admin username    | Static: admin  |
+| `admin-password` | Grafana admin password    | Self-generated |
+
+**Template:** `secrets/observability-secrets.template.yaml`
+
 ## Other apps
 
 - **lab-home** — No secrets required.
