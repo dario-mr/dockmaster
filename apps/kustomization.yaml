@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - lab-home/deployment.yaml
+  - lab-home/service.yaml
+  - lab-home/ingressroute.yaml
+  - wordle-duel-service/deployment.yaml
+  - wordle-duel-service/service.yaml
+  - wordle-duel-service/configmap.yaml
+  - wordle-duel-service/ingressroute.yaml
+  - wordle-duel-service-redis/deployment.yaml
+  - wordle-duel-service-redis/service.yaml
+  - wordle-duel-service-redis/pvc.yaml
+  - wordle-duel/deployment.yaml
+  - wordle-duel/service.yaml
+  - wordle-duel/ingressroute.yaml

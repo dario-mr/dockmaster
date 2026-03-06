@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wordle-duel
+  namespace: apps
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: wordle-duel
+  template:
+    metadata:
+      labels:
+        app: wordle-duel
+    spec:
+      containers:
+        - name: wordle-duel
+          image: dariomr8/wordle-duel:latest
+          ports:
+            - containerPort: 80
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3

@@ -1,0 +1,19 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: lab-home
+  namespace: apps
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`dariolab.com`) && (Path(`/`) || Path(`/index.html`) || Path(`/favicon.ico`) || PathPrefix(`/assets/`) || PathPrefix(`/icons/`))
+      kind: Rule
+      services:
+        - name: lab-home
+          port: 80
+      middlewares:
+        - name: default-headers
+        - name: rate-limit-global
+  tls:
+    certResolver: letsencrypt

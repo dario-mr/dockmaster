@@ -1,1 +1,4 @@
 .idea
+
+secrets/*.yaml
+!secrets/*.template.yaml

@@ -1,0 +1,23 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: rate-limit-global
+  namespace: apps
+spec:
+  rateLimit:
+    average: 20
+    burst: 200
+    sourceCriterion:
+      ipStrategy: {}
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: rate-limit-app
+  namespace: apps
+spec:
+  rateLimit:
+    average: 10
+    burst: 100
+    sourceCriterion:
+      ipStrategy: {}

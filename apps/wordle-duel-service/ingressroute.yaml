@@ -1,0 +1,30 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: strip-wordle-duel-service
+  namespace: apps
+spec:
+  stripPrefix:
+    prefixes:
+      - /wordle-duel-service
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: wordle-duel-service
+  namespace: apps
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`dariolab.com`) && PathPrefix(`/wordle-duel-service`)
+      kind: Rule
+      services:
+        - name: wordle-duel-service
+          port: 8088
+      middlewares:
+        - name: strip-wordle-duel-service
+        - name: default-headers
+        - name: rate-limit-app
+  tls:
+    certResolver: letsencrypt
