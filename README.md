@@ -49,6 +49,7 @@ docs/                  Documentation
    ```bash
    kubectl get pods -n apps
    flux get kustomizations
+   flux get kustomizations --watch
    ```
 
 See [docs/secrets-inventory.md](docs/secrets-inventory.md) for all required secret values.

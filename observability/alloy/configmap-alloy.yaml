@@ -19,30 +19,26 @@ data:
     	// Parse top-level JSON from Traefik access logs
     	stage.json {
     		expressions = {
-    			duration    = "Duration",
-    			method      = "RequestMethod",
-    			remote_ip   = "ClientAddr",
-    			uri         = "RequestPath",
-    			status      = "OriginStatus",
-    			size        = "OriginContentSize",
+    			duration     = "Duration",
+    			method       = "RequestMethod",
+    			remote_ip    = "ClientAddr",
+    			uri          = "RequestPath",
+    			status       = "OriginStatus",
+    			size         = "OriginContentSize",
     			request_host = "RequestHost",
-    			start_utc   = "StartUTC",
+    			start_utc    = "StartUTC",
     		}
     	}
 
     	// Strip port from ClientAddr (e.g. "1.2.3.4:12345" -> "1.2.3.4")
-    	stage.template {
-    		source   = "remote_ip"
-    		template = "{{ regexReplaceAll \":.*\" .remote_ip \"\" }}"
-    	}
-
-    	// Convert Traefik duration (nanoseconds) to seconds
-    	stage.template {
-    		source   = "duration"
-    		template = "{{ divide .duration 1000000000.0 }}"
+    	stage.replace {
+    		expression = "^(?P<ip>[^:]+):\\d+$"
+    		source     = "remote_ip"
+    		replace    = "{{ .ip }}"
     	}
 
     	// Build a compact JSON line with the necessary fields
+    	// Duration from Traefik is in nanoseconds (integer)
     	stage.template {
     		source   = "packed"
     		template = `{{ toJson (dict
@@ -92,7 +88,7 @@ data:
     }
 
     discovery.relabel "pod_logs" {
-    	targets = []
+    	targets = discovery.kubernetes.pod_logs.targets
 
     	rule {
     		source_labels = ["__meta_kubernetes_pod_node_name"]
@@ -138,21 +134,12 @@ data:
     }
 
     loki.source.kubernetes "pod_logs" {
-    	targets    = discovery.kubernetes.pod_logs.targets
-    	forward_to = [loki.process.pod_logs.receiver]
+    	targets       = discovery.relabel.pod_logs.output
+    	forward_to    = [loki.process.pod_logs.receiver]
     }
 
     loki.process "pod_logs" {
     	forward_to = [loki.write.default.receiver]
-
-    	stage.labels {
-    		values = {host = "dariolab.com"}
-    	}
-
-    	// Apply relabel rules
-    	stage.label_drop {
-    		values = ["filename"]
-    	}
 
     	// Plain-text apps (Redis)
     	stage.match {
