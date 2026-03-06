@@ -146,6 +146,14 @@ data:
     		expression = "kube-probe/"
     	}
 
+    	// Drop logs from static-site apps (only produce nginx access logs, no app-level logging)
+    	stage.match {
+    		selector = "{app=~\"wordle-duel|lab-home\"}"
+    		stage.drop {
+    			expression = ".*"
+    		}
+    	}
+
     	// Plain-text apps (Redis)
     	stage.match {
     		selector = "{app=\"wordle-duel-service-redis\"}"
