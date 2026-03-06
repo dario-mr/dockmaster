@@ -6,7 +6,7 @@ GitOps-managed k3s cluster for self-hosted applications, powered by [Flux](https
 
 ```
 clusters/production/       Flux Kustomizations (infrastructure → observability → apps)
-infrastructure/            Namespaces, Traefik config (HelmChartConfig), middlewares, Kubernetes Dashboard
+infrastructure/            Namespaces, Traefik config (HelmChartConfig), middlewares, Headlamp
 observability/             Prometheus stack, Loki, Alloy, Grafana dashboards
 apps/                      Application deployments (lab-home, wordle-duel, wordle-duel-service, redis)
 scripts/                   Bootstrap and operational scripts
@@ -22,22 +22,22 @@ docs/                      Documentation (secrets inventory)
 | [kube-prometheus-stack](https://github.com/prometheus-community/helm-charts) | Prometheus, Grafana, node-exporter, kube-state-metrics | 72.9.1        |
 | [Loki](https://grafana.com/oss/loki/)                                        | Log aggregation (SingleBinary, TSDB, 30d retention)    | 6.53.0        |
 | [Alloy](https://grafana.com/oss/alloy/)                                      | Log collection (pod logs + Traefik access logs)        | 0.12.6        |
-| [Kubernetes Dashboard](https://github.com/kubernetes/dashboard)              | Cluster web UI (basicAuth via Traefik)                 | 7.12.0        |
+| [Headlamp](https://headlamp.dev/)                                            | Cluster web UI (basicAuth via Traefik)                 | 0.40.0        |
 
 ## Applications
 
-| App                  | Description              | URL                                     |
-|----------------------|--------------------------|-----------------------------------------|
-| lab-home             | Static landing page      | `https://dariolab.com/`                 |
-| wordle-duel          | Wordle game frontend     | `https://dariolab.com/wordle-duel/`     |
-| wordle-duel-service  | Spring Boot API backend  | `https://dariolab.com/wordle-duel/api/` |
-| Grafana              | Observability dashboards | `https://dariolab.com/grafana/`         |
-| Kubernetes Dashboard | Cluster management UI    | `https://dashboard.dariolab.com`        |
+| App                 | Description              | URL                                     |
+|---------------------|--------------------------|-----------------------------------------|
+| lab-home            | Static landing page      | `https://dariolab.com/`                 |
+| wordle-duel         | Wordle game frontend     | `https://dariolab.com/wordle-duel/`     |
+| wordle-duel-service | Spring Boot API backend  | `https://dariolab.com/wordle-duel/api/` |
+| Grafana             | Observability dashboards | `https://dariolab.com/grafana/`         |
+| Headlamp            | Cluster management UI    | `https://dariolab.com/dashboard`        |
 
 ## Prerequisites
 
 - VPS with ports 80 and 443 open
-- DNS A records for `dariolab.com` and `dashboard.dariolab.com` pointing to VPS IP
+- DNS A record for `dariolab.com` pointing to VPS IP
 - GitHub Personal Access Token with repo permissions for flux
 
 ## Quick Start

@@ -28,7 +28,7 @@ All secrets required by the cluster.
 
 **Template:** `secrets/observability-secrets.template.yaml`
 
-## Kubernetes Dashboard
+## Headlamp
 
 **Secret name:** `dashboard-basic-auth` (namespace: `kubernetes-dashboard`)
 
