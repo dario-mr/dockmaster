@@ -1,0 +1,13 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - namespace.yaml
+  - sources/helm-repositories.yaml
+  - loki/helmrelease.yaml
+  - kube-prometheus-stack/helmrelease.yaml
+  - alloy/configmap-alloy.yaml
+  - alloy/helmrelease.yaml
+  - grafana/ingressroute.yaml
+  - grafana/dashboards/configmap-dashboards-metrics.yaml
+  - grafana/dashboards/configmap-dashboard-host.yaml
+  - grafana/dashboards/configmap-dashboards-logs.yaml

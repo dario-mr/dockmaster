@@ -1,0 +1,305 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: alloy-config
+  namespace: observability
+data:
+  config.alloy: |
+    // ----------- Loki sink -----------
+    loki.write "default" {
+    	endpoint {
+    		url = "http://loki.observability.svc.cluster.local:3100/loki/api/v1/push"
+    	}
+    }
+
+    // ----------- Traefik access logs (from log file) -----------
+    loki.process "traefik_access" {
+    	forward_to = [loki.relabel.drop_filename_traefik.receiver]
+
+    	// Parse top-level JSON from Traefik access logs
+    	stage.json {
+    		expressions = {
+    			duration    = "Duration",
+    			method      = "RequestMethod",
+    			remote_ip   = "ClientAddr",
+    			uri         = "RequestPath",
+    			status      = "OriginStatus",
+    			size        = "OriginContentSize",
+    			request_host = "RequestHost",
+    			start_utc   = "StartUTC",
+    		}
+    	}
+
+    	// Strip port from ClientAddr (e.g. "1.2.3.4:12345" -> "1.2.3.4")
+    	stage.template {
+    		source   = "remote_ip"
+    		template = "{{ regexReplaceAll \":.*\" .remote_ip \"\" }}"
+    	}
+
+    	// Convert Traefik duration (nanoseconds) to seconds
+    	stage.template {
+    		source   = "duration"
+    		template = "{{ divide .duration 1000000000.0 }}"
+    	}
+
+    	// Build a compact JSON line with the necessary fields
+    	stage.template {
+    		source   = "packed"
+    		template = `{{ toJson (dict
+                "method"    .method
+                "uri"       .uri
+                "remote_ip" .remote_ip
+                "status"    .status
+                "size"      .size
+                "duration"  .duration
+            ) }}`
+    	}
+
+    	// Replace the log line with that compact JSON
+    	stage.output {
+    		source = "packed"
+    	}
+
+    	stage.timestamp {
+    		source = "start_utc"
+    		format = "RFC3339Nano"
+    	}
+    }
+
+    // Drop 'filename' label to keep streams lean
+    loki.relabel "drop_filename_traefik" {
+    	forward_to = [loki.write.default.receiver]
+
+    	rule {
+    		action = "labeldrop"
+    		regex  = "filename"
+    	}
+    }
+
+    loki.source.file "traefik_access" {
+    	targets = [{
+    		__path__ = "/var/log/traefik/access.log",
+    		host     = "dariolab.com",
+    		job      = "traefik_access",
+    	}]
+    	forward_to    = [loki.process.traefik_access.receiver]
+    	tail_from_end = true
+    }
+
+    // ----------- Kubernetes pod logs -----------
+    discovery.kubernetes "pod_logs" {
+    	role = "pod"
+    }
+
+    discovery.relabel "pod_logs" {
+    	targets = []
+
+    	rule {
+    		source_labels = ["__meta_kubernetes_pod_node_name"]
+    		target_label  = "__host__"
+    	}
+
+    	rule {
+    		source_labels = ["__meta_kubernetes_namespace"]
+    		target_label  = "namespace"
+    	}
+
+    	rule {
+    		source_labels = ["__meta_kubernetes_pod_label_app"]
+    		target_label  = "app"
+    	}
+
+    	rule {
+    		source_labels = ["__meta_kubernetes_pod_label_app_kubernetes_io_name"]
+    		target_label  = "__tmp_app_name"
+    	}
+
+    	// Use app.kubernetes.io/name as fallback if app label is empty
+    	rule {
+    		source_labels = ["app", "__tmp_app_name"]
+    		regex         = ";(.+)"
+    		target_label  = "app"
+    	}
+
+    	rule {
+    		source_labels = ["__meta_kubernetes_pod_name"]
+    		target_label  = "pod"
+    	}
+
+    	rule {
+    		source_labels = ["__meta_kubernetes_pod_container_name"]
+    		target_label  = "container"
+    	}
+
+    	rule {
+    		target_label = "job"
+    		replacement  = "pod_logs"
+    	}
+    }
+
+    loki.source.kubernetes "pod_logs" {
+    	targets    = discovery.kubernetes.pod_logs.targets
+    	forward_to = [loki.process.pod_logs.receiver]
+    }
+
+    loki.process "pod_logs" {
+    	forward_to = [loki.write.default.receiver]
+
+    	stage.labels {
+    		values = {host = "dariolab.com"}
+    	}
+
+    	// Apply relabel rules
+    	stage.label_drop {
+    		values = ["filename"]
+    	}
+
+    	// Plain-text apps (Redis)
+    	stage.match {
+    		selector = "{app=\"wordle-duel-service-redis\"}"
+
+    		stage.template {
+    			source   = "packed"
+    			template = `{"msg":{{ toJson .Entry }}}`
+    		}
+
+    		stage.output {
+    			source = "packed"
+    		}
+    	}
+
+    	// Grafana
+    	stage.match {
+    		selector = "{app=~\"grafana|kube-prometheus-stack-grafana\"}"
+
+    		stage.logfmt {
+    			mapping = {
+    				t      = "t",
+    				level  = "level",
+    				logger = "logger",
+    				msg    = "msg",
+    				error  = "error",
+    				query  = "query",
+    			}
+    		}
+
+    		stage.labels {
+    			values = {level = null}
+    		}
+
+    		stage.template {
+    			source   = "packed"
+    			template = `{"logger":{{ toJson .logger }},"msg":{{ toJson .msg }}{{ if .error }},"error":{{ toJson .error }}{{ end }}{{ if .query }},"query":{{ toJson .query }}{{ end }}}`
+    		}
+
+    		stage.output {
+    			source = "packed"
+    		}
+
+    		stage.timestamp {
+    			source = "t"
+    			format = "RFC3339Nano"
+    		}
+    	}
+
+    	// Alloy
+    	stage.match {
+    		selector = "{app=\"alloy\"}"
+
+    		stage.logfmt {
+    			mapping = {
+    				ts           = "ts",
+    				level        = "level",
+    				msg          = "msg",
+    				component_id = "component_id",
+    				error        = "error",
+    				err          = "err",
+    				node_id      = "node_id",
+    			}
+    		}
+
+    		stage.labels {
+    			values = {level = null}
+    		}
+
+    		stage.template {
+    			source   = "packed"
+    			template = `{ "msg":{{ toJson .msg }}{{ if .node_id }},"node_id":{{ toJson .node_id }}{{ end }}{{ if .component_id }},"component_id":{{ toJson .component_id }}{{ end }}{{ if .error }},"error":{{ toJson .error }}{{ end }}{{ if .err }},"error":{{ toJson .err }}{{ end }} }`
+    		}
+
+    		stage.output {
+    			source = "packed"
+    		}
+
+    		stage.timestamp {
+    			source = "ts"
+    			format = "RFC3339Nano"
+    		}
+    	}
+
+    	// Prometheus
+    	stage.match {
+    		selector = "{app=~\"prometheus|kube-prometheus-stack-prometheus\"}"
+
+    		stage.logfmt {
+    			mapping = {time = "time", level = "level", msg = "msg"}
+    		}
+
+    		stage.labels {
+    			values = {level = null}
+    		}
+
+    		stage.template {
+    			source   = "packed"
+    			template = `{{ toJson (dict "msg" .msg) }}`
+    		}
+
+    		stage.output {
+    			source = "packed"
+    		}
+
+    		stage.timestamp {
+    			source = "time"
+    			format = "RFC3339Nano"
+    		}
+    	}
+
+    	// All other JSON apps (e.g. Spring Boot apps like wordle-duel-service)
+    	stage.match {
+    		selector = "{app!~\"^(grafana|kube-prometheus-stack-grafana|prometheus|kube-prometheus-stack-prometheus|alloy|wordle-duel-service-redis)$\"}"
+
+    		stage.json {
+    			expressions = {level = "level", logger = "logger_name", msg = "message", ts = "[\"@timestamp\"]", stack_trace = "stack_trace", trace_id = "traceId"}
+    		}
+
+    		stage.json {
+    			expressions = {ts = "timestamp"}
+    		}
+
+    		stage.json {
+    			expressions = {ts = "time"}
+    		}
+
+    		stage.json {
+    			expressions = {ts = "ts"}
+    		}
+
+    		stage.labels {
+    			values = {level = null}
+    		}
+
+    		stage.template {
+    			source   = "packed"
+    			template = `{"msg":{{ toJson .msg }},"logger":{{ toJson .logger }}{{ if .stack_trace }},"stack_trace":{{ toJson .stack_trace }}{{ end }}{{ if .trace_id }},"trace_id":{{ toJson .trace_id }}{{ end }}}`
+    		}
+
+    		stage.output {
+    			source = "packed"
+    		}
+
+    		stage.timestamp {
+    			source = "ts"
+    			format = "RFC3339Nano"
+    		}
+    	}
+    }
