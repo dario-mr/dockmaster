@@ -18,12 +18,10 @@ spec:
       enabled: true
     volumes:
       - name: access-logs
-        hostPath:
-          path: /var/log/traefik
-          type: DirectoryOrCreate
-    additionalVolumeMounts:
-      - name: access-logs
         mountPath: /var/log/traefik
+        type: hostPath
+        path: /var/log/traefik
+        hostPathType: DirectoryOrCreate
     ingressRoute:
       dashboard:
         enabled: false
