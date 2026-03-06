@@ -141,6 +141,11 @@ data:
     loki.process "pod_logs" {
     	forward_to = [loki.write.default.receiver]
 
+    	// Drop Kubernetes health-check probe logs (noisy, no value)
+    	stage.drop {
+    		expression = "kube-probe/"
+    	}
+
     	// Plain-text apps (Redis)
     	stage.match {
     		selector = "{app=\"wordle-duel-service-redis\"}"
