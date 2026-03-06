@@ -1,0 +1,8 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: dashboard-basic-auth
+  namespace: kubernetes-dashboard
+spec:
+  basicAuth:
+    secret: dashboard-basic-auth

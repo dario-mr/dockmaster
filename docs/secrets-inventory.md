@@ -1,6 +1,6 @@
 # Secrets Inventory
 
-All secrets required by the 4 in-scope apps.
+All secrets required by the cluster.
 
 ## wordle-duel-service
 
@@ -21,12 +21,24 @@ All secrets required by the 4 in-scope apps.
 
 **Secret name:** `grafana-admin-secret` (namespace: `observability`)
 
-| Key              | Description               | Source         |
-|------------------|---------------------------|----------------|
-| `admin-user`     | Grafana admin username    | Static: admin  |
-| `admin-password` | Grafana admin password    | Self-generated |
+| Key              | Description            | Source         |
+|------------------|------------------------|----------------|
+| `admin-user`     | Grafana admin username | Static: admin  |
+| `admin-password` | Grafana admin password | Self-generated |
 
 **Template:** `secrets/observability-secrets.template.yaml`
+
+## Kubernetes Dashboard
+
+**Secret name:** `dashboard-basic-auth` (namespace: `kubernetes-dashboard`)
+
+| Key     | Description                                          | Source         |
+|---------|------------------------------------------------------|----------------|
+| `users` | htpasswd entry (e.g. `admin:$2y$...`), bcrypt hashed | Self-generated |
+
+Generate with: `htpasswd -nbB admin YOUR_PASSWORD`
+
+**Template:** `secrets/dashboard-secrets.template.yaml`
 
 ## Other apps
 

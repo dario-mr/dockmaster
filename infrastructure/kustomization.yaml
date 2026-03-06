@@ -5,3 +5,9 @@ resources:
   - traefik/helmchartconfig.yaml
   - traefik/default-headers.yaml
   - traefik/rate-limit.yaml
+  - kubernetes-dashboard/namespace.yaml
+  - kubernetes-dashboard/helmrepository.yaml
+  - kubernetes-dashboard/helmrelease.yaml
+  - kubernetes-dashboard/admin-user.yaml
+  - kubernetes-dashboard/basic-auth.yaml
+  - kubernetes-dashboard/ingressroute.yaml
