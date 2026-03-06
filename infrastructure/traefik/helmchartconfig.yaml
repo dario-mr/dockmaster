@@ -16,7 +16,7 @@ spec:
       - "--accesslog.filepath=/var/log/traefik/access.log"
     persistence:
       enabled: true
-    additionalVolumes:
+    volumes:
       - name: access-logs
         hostPath:
           path: /var/log/traefik
