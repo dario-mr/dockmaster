@@ -157,7 +157,7 @@ data:
 
     	// Grafana
     	stage.match {
-    		selector = "{app=~\"grafana|kube-prometheus-stack-grafana\"}"
+    		selector = "{app=~\"grafana|kube-prometheus-stack-grafana\", container=\"grafana\"}"
 
     		stage.logfmt {
     			mapping = {
@@ -191,7 +191,7 @@ data:
 
     	// Alloy
     	stage.match {
-    		selector = "{app=\"alloy\"}"
+    		selector = "{app=\"alloy\", container=\"alloy\"}"
 
     		stage.logfmt {
     			mapping = {
@@ -226,7 +226,7 @@ data:
 
     	// Prometheus
     	stage.match {
-    		selector = "{app=~\"prometheus|kube-prometheus-stack-prometheus\"}"
+    		selector = "{app=~\"prometheus|kube-prometheus-stack-prometheus\", container=\"prometheus\"}"
 
     		stage.logfmt {
     			mapping = {time = "time", level = "level", msg = "msg"}
