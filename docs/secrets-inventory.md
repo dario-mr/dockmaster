@@ -28,6 +28,23 @@ All secrets required by the cluster.
 
 **Template:** `secrets/observability-secrets.template.yaml`
 
+## Crowdsec
+
+**Secret name:** `crowdsec-secrets` (namespace: `crowdsec`)
+
+| Key           | Description                     | Source                                 |
+|---------------|---------------------------------|----------------------------------------|
+| `bouncer-key` | Bouncer API key for Traefik     | Self-generated: `openssl rand -hex 32` |
+| `enroll-key`  | Crowdsec Console enrollment key | https://app.crowdsec.net (optional)    |
+
+**Secret name:** `crowdsec-bouncer-key` (namespace: `kube-system`)
+
+| Key           | Description                                          | Source                                    |
+|---------------|------------------------------------------------------|-------------------------------------------|
+| `bouncer-key` | Same bouncer key (Traefik needs it in its namespace) | Must match `crowdsec-secrets.bouncer-key` |
+
+**Template:** `secrets/crowdsec-secrets.template.yaml`
+
 ## Headlamp
 
 **Secret name:** `headlamp-admin-token` (namespace: `kubernetes-dashboard`)

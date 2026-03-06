@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: crowdsec-acquis
+  namespace: crowdsec
+data:
+  acquis-traefik.yaml: |
+    source: file
+    filenames:
+      - /var/log/traefik/access.log
+    labels:
+      type: traefik

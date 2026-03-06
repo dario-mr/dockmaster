@@ -5,6 +5,12 @@ resources:
   - traefik/helmchartconfig.yaml
   - traefik/default-headers.yaml
   - traefik/rate-limit.yaml
+  - crowdsec/namespace.yaml
+  - crowdsec/helmrepository.yaml
+  - crowdsec/helmrelease.yaml
+  - crowdsec/acquis.yaml
+  - crowdsec/whitelist.yaml
+  - crowdsec/bouncer-middleware.yaml
   - kubernetes-dashboard/namespace.yaml
   - kubernetes-dashboard/helmrepository.yaml
   - kubernetes-dashboard/helmrelease.yaml

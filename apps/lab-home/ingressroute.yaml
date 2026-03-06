@@ -13,6 +13,7 @@ spec:
         - name: lab-home
           port: 80
       middlewares:
+        - name: crowdsec-bouncer
         - name: default-headers
         - name: rate-limit-global
   tls:

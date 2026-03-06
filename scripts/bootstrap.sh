@@ -31,11 +31,16 @@ echo "[..] Waiting for Traefik..."
 kubectl wait --for=condition=Available deployment/traefik -n kube-system --timeout=180s
 echo "[OK] Traefik running"
 
-# 4. Create apps namespace (so secrets can be applied before Flux runs)
+# 4. Prepare Traefik access log directory (Traefik runs as UID 65532)
+mkdir -p /var/log/traefik
+chown 65532:65532 /var/log/traefik
+echo "[OK] Traefik access log directory ready"
+
+# 5. Create apps namespace (so secrets can be applied before Flux runs)
 kubectl create namespace apps --dry-run=client -o yaml | kubectl apply -f -
 echo "[OK] Namespace 'apps' ensured"
 
-# 5. Install Flux CLI (idempotent)
+# 6. Install Flux CLI (idempotent)
 if command -v flux &>/dev/null; then
   echo "[OK] Flux CLI already installed"
 else
@@ -44,7 +49,7 @@ else
   echo "[OK] Flux CLI installed"
 fi
 
-# 6. Check GITHUB_TOKEN
+# 7. Check GITHUB_TOKEN
 if [ -z "${GITHUB_TOKEN:-}" ]; then
   echo "[ERROR] GITHUB_TOKEN environment variable is not set."
   echo "  Export it before running this script:"
@@ -52,7 +57,7 @@ if [ -z "${GITHUB_TOKEN:-}" ]; then
   exit 1
 fi
 
-# 7. Bootstrap Flux
+# 8. Bootstrap Flux
 echo "[..] Bootstrapping Flux..."
 flux bootstrap github \
   --owner=dario-mr \
@@ -62,7 +67,7 @@ flux bootstrap github \
   --personal
 echo "[OK] Flux bootstrapped"
 
-# 8. Verification
+# 9. Verification
 echo ""
 echo "=== Verification ==="
 echo "Run these commands to verify the setup:"

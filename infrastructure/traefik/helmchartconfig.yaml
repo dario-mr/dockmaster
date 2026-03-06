@@ -14,14 +14,41 @@ spec:
       - "--accesslog=true"
       - "--accesslog.format=json"
       - "--accesslog.filepath=/var/log/traefik/access.log"
-    persistence:
-      enabled: true
-    volumes:
+      - "--experimental.plugins.bouncer.modulename=github.com/maxlerebourg/crowdsec-bouncer-traefik-plugin"
+      - "--experimental.plugins.bouncer.version=v1.4.1"
+      - "--providers.kubernetescrd.allowCrossNamespace=true"
+    deployment:
+      kind: Deployment
+      replicas: 1
+      strategy:
+        type: Recreate
+      additionalVolumes:
+        - name: plugins-storage
+          emptyDir: {}
+        - name: access-logs
+          hostPath:
+            path: /var/log/traefik
+            type: DirectoryOrCreate
+        - name: crowdsec-bouncer-key
+          secret:
+            secretName: crowdsec-bouncer-key
+    additionalVolumeMounts:
+      - name: plugins-storage
+        mountPath: /plugins-storage
       - name: access-logs
         mountPath: /var/log/traefik
-        type: hostPath
-        path: /var/log/traefik
-        hostPathType: DirectoryOrCreate
+      - name: crowdsec-bouncer-key
+        mountPath: /etc/traefik/crowdsec
+        readOnly: true
+    ports:
+      web:
+        hostPort: 80
+      websecure:
+        hostPort: 443
+    service:
+      type: ClusterIP
+    persistence:
+      enabled: true
     ingressRoute:
       dashboard:
         enabled: false

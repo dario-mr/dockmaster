@@ -9,6 +9,9 @@ spec:
   routes:
     - match: Host(`dariolab.com`) && PathPrefix(`/grafana/`)
       kind: Rule
+      middlewares:
+        - name: crowdsec-bouncer
+          namespace: apps
       services:
         - name: kube-prometheus-stack-grafana
           port: 80

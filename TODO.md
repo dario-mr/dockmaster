@@ -1,3 +1,5 @@
+# TODO
+
 - fix access-logs dashboard, completely broken for now
 - extract domain in a single variable?
 - mermaid diagram in readme

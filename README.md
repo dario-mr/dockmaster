@@ -6,12 +6,12 @@ GitOps-managed k3s cluster for self-hosted applications, powered by [Flux](https
 
 ```
 clusters/production/       Flux Kustomizations (infrastructure → observability → apps)
-infrastructure/            Namespaces, Traefik config (HelmChartConfig), middlewares, Headlamp
+infrastructure/            Namespaces, Traefik config (HelmChartConfig), middlewares, Crowdsec, Headlamp
 observability/             Prometheus stack, Loki, Alloy, Grafana dashboards
 apps/                      Application deployments (lab-home, wordle-duel, wordle-duel-service, redis)
 scripts/                   Bootstrap and operational scripts
 secrets/                   Secret templates (real values git-ignored)
-docs/                      Documentation (secrets inventory)
+docs/                      Documentation (secrets inventory, Crowdsec operations)
 ```
 
 ## Stack
@@ -22,6 +22,7 @@ docs/                      Documentation (secrets inventory)
 | [kube-prometheus-stack](https://github.com/prometheus-community/helm-charts) | Prometheus, Grafana, node-exporter, kube-state-metrics | 72.9.1        |
 | [Loki](https://grafana.com/oss/loki/)                                        | Log aggregation (SingleBinary, TSDB, 30d retention)    | 6.53.0        |
 | [Alloy](https://grafana.com/oss/alloy/)                                      | Log collection (pod logs + Traefik access logs)        | 0.12.6        |
+| [Crowdsec](https://www.crowdsec.net/)                                        | Intrusion detection + Traefik bouncer                  | 0.22.1        |
 | [Headlamp](https://headlamp.dev/)                                            | Cluster web UI (token auth)                            | 0.40.0        |
 
 ## Applications
@@ -52,6 +53,7 @@ docs/                      Documentation (secrets inventory)
    ```bash
    cp secrets/wordle-duel-service-secrets.template.yaml secrets/wordle-duel-service-secrets.yaml
    cp secrets/observability-secrets.template.yaml secrets/observability-secrets.yaml
+   cp secrets/crowdsec-secrets.template.yaml secrets/crowdsec-secrets.yaml
    # Edit secrets with real values
    ```
 
@@ -73,6 +75,7 @@ docs/                      Documentation (secrets inventory)
    ```
 
 See [docs/secrets-inventory.md](docs/secrets-inventory.md) for all required secret values.
+See [docs/crowdsec.md](docs/crowdsec.md) for Crowdsec operations and troubleshooting.
 
 ## Operations
 

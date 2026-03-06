@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: crowdsec-whitelist
+  namespace: crowdsec
+data:
+  my-whitelist.yaml: |
+    name: crowdsecurity/my-whitelist
+    description: "Admin IP whitelist"
+    whitelist:
+      reason: "admin IP"
+      ip:
+        - "86.49.252.108"

@@ -24,6 +24,8 @@ spec:
         - name: headlamp
           port: 80
       middlewares:
+        - name: crowdsec-bouncer
+          namespace: apps
         - name: dashboard-redirect
   tls:
     certResolver: letsencrypt
