@@ -189,20 +189,12 @@ data:
     		}
     	}
 
-    	// Alloy
+    	// Alloy (regex instead of logfmt: Alloy emits quoted keys like "start time" that break logfmt)
     	stage.match {
     		selector = "{app=\"alloy\", container=\"alloy\"}"
 
-    		stage.logfmt {
-    			mapping = {
-    				ts           = "ts",
-    				level        = "level",
-    				msg          = "msg",
-    				component_id = "component_id",
-    				error        = "error",
-    				err          = "err",
-    				node_id      = "node_id",
-    			}
+    		stage.regex {
+    			expression = `^ts=(?P<ts>\S+)\s+level=(?P<level>\S+)\s+msg="(?P<msg>[^"]*)"(?:\s+component_path=\S+)?(?:\s+component_id=(?P<component_id>\S+))?`
     		}
 
     		stage.labels {
@@ -211,7 +203,7 @@ data:
 
     		stage.template {
     			source   = "packed"
-    			template = `{ "msg":{{ toJson .msg }}{{ if .node_id }},"node_id":{{ toJson .node_id }}{{ end }}{{ if .component_id }},"component_id":{{ toJson .component_id }}{{ end }}{{ if .error }},"error":{{ toJson .error }}{{ end }}{{ if .err }},"error":{{ toJson .err }}{{ end }} }`
+    			template = `{"msg":{{ toJson .msg }}{{ if .component_id }},"component_id":{{ toJson .component_id }}{{ end }}}`
     		}
 
     		stage.output {
