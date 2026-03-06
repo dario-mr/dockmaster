@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: wordle-duel
+  namespace: apps
+spec:
+  selector:
+    app: wordle-duel
+  ports:
+    - port: 80
+      targetPort: 80

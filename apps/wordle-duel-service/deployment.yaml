@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wordle-duel-service
+  namespace: apps
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: wordle-duel-service
+  template:
+    metadata:
+      labels:
+        app: wordle-duel-service
+    spec:
+      containers:
+        - name: wordle-duel-service
+          image: dariomr8/wordle-duel-service:latest
+          ports:
+            - containerPort: 8088
+          envFrom:
+            - secretRef:
+                name: wordle-duel-service-secrets
+            - configMapRef:
+                name: wordle-duel-service-config
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8088
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8088
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3

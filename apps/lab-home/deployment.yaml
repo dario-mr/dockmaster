@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lab-home
+  namespace: apps
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: lab-home
+  template:
+    metadata:
+      labels:
+        app: lab-home
+    spec:
+      containers:
+        - name: lab-home
+          image: dariomr8/lab-home:latest
+          ports:
+            - containerPort: 80
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
