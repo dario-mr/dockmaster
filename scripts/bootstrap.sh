@@ -12,8 +12,11 @@ else
   echo "[OK] k3s installed"
 fi
 
-# Make kubeconfig available
+# Make kubeconfig available (persist for future shells)
 export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
+if ! grep -q 'KUBECONFIG=/etc/rancher/k3s/k3s.yaml' ~/.bashrc 2>/dev/null; then
+  echo 'export KUBECONFIG=/etc/rancher/k3s/k3s.yaml' >> ~/.bashrc
+fi
 
 # 2. Wait for node to be ready
 echo "[..] Waiting for node to be ready..."
