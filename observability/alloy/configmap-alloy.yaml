@@ -146,9 +146,9 @@ data:
     		expression = "kube-probe/"
     	}
 
-    	// Drop logs from static-site apps (only produce nginx access logs, no app-level logging)
+    	// Drop logs from infrastructure/static apps — keep only apps with useful application logs
     	stage.match {
-    		selector = "{app=~\"wordle-duel|lab-home\"}"
+    		selector = "{app!~\"^(grafana|kube-prometheus-stack-grafana|prometheus|kube-prometheus-stack-prometheus|alloy|wordle-duel-service|wordle-duel-service-redis)$\"}"
     		stage.drop {
     			expression = ".*"
     		}
