@@ -19,14 +19,16 @@ spec:
         create: false
         name: alloy-config
         key: config.alloy
+      mounts:
+        extra:
+          - name: traefik-logs
+            mountPath: /var/log/traefik
+            readOnly: true
     controller:
       type: daemonset
-    extraVolumes:
-      - name: traefik-logs
-        hostPath:
-          path: /var/log/traefik
-          type: DirectoryOrCreate
-    extraVolumeMounts:
-      - name: traefik-logs
-        mountPath: /var/log/traefik
-        readOnly: true
+      volumes:
+        extra:
+          - name: traefik-logs
+            hostPath:
+              path: /var/log/traefik
+              type: DirectoryOrCreate
