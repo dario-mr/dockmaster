@@ -12,7 +12,5 @@ spec:
       services:
         - name: headlamp
           port: 80
-      middlewares:
-        - name: dashboard-basic-auth
   tls:
     certResolver: letsencrypt
