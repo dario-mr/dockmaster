@@ -15,7 +15,6 @@ for file in "$SECRETS_DIR"/*.yaml; do
   if [ -f "$file" ]; then
     echo "[..] Applying $(basename "$file")..."
     kubectl apply -f "$file"
-    echo "[OK] Applied $(basename "$file")"
   fi
 done
 

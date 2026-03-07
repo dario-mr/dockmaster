@@ -21,7 +21,7 @@ data:
     		expressions = {
     			duration     = "Duration",
     			method       = "RequestMethod",
-    			remote_ip    = "ClientAddr",
+    			remote_ip    = "ClientHost",
     			uri          = "RequestPath",
     			status       = "OriginStatus",
     			size         = "OriginContentSize",
@@ -30,11 +30,11 @@ data:
     		}
     	}
 
-    	// Strip port from ClientAddr (e.g. "1.2.3.4:12345" -> "1.2.3.4")
-    	stage.replace {
-    		expression = "^(?P<ip>[^:]+):\\d+$"
-    		source     = "remote_ip"
-    		replace    = "{{ .ip }}"
+    	// Enrich with GeoIP data (latitude, longitude, country, city)
+    	stage.geoip {
+    		source  = "remote_ip"
+    		db      = "/var/lib/geoipupdate/GeoLite2-City.mmdb"
+    		db_type = "city"
     	}
 
     	// Build a compact JSON line with the necessary fields
@@ -48,6 +48,10 @@ data:
                 "status"    .status
                 "size"      .size
                 "duration"  .duration
+                "geoip_city_name"          (default "" .geoip_city_name)
+                "geoip_country_name"       (default "" .geoip_country_name)
+                "geoip_location_latitude"  (default "" .geoip_location_latitude)
+                "geoip_location_longitude" (default "" .geoip_location_longitude)
             ) }}`
     	}
 

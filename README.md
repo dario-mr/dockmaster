@@ -55,6 +55,7 @@ docs/                      Documentation (secrets inventory, Crowdsec operations
    cp secrets/wordle-duel-service-secrets.template.yaml secrets/wordle-duel-service-secrets.yaml
    cp secrets/observability-secrets.template.yaml secrets/observability-secrets.yaml
    cp secrets/crowdsec-secrets.template.yaml secrets/crowdsec-secrets.yaml
+   cp secrets/geoipupdate-secret.template.yaml secrets/geoipupdate-secret.yaml
    # Edit secrets with real values
    ```
 

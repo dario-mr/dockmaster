@@ -16,3 +16,4 @@ resources:
   - kubernetes-dashboard/helmrelease.yaml
   - kubernetes-dashboard/admin-user.yaml
   - kubernetes-dashboard/ingressroute.yaml
+  - geoipupdate/cronjob.yaml

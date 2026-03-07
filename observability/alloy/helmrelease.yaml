@@ -24,6 +24,9 @@ spec:
           - name: traefik-logs
             mountPath: /var/log/traefik
             readOnly: true
+          - name: geoip-data
+            mountPath: /var/lib/geoipupdate
+            readOnly: true
     controller:
       type: daemonset
       volumes:
@@ -31,4 +34,8 @@ spec:
           - name: traefik-logs
             hostPath:
               path: /var/log/traefik
+              type: DirectoryOrCreate
+          - name: geoip-data
+            hostPath:
+              path: /var/lib/geoipupdate
               type: DirectoryOrCreate
