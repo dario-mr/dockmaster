@@ -82,28 +82,6 @@ kubectl -n crowdsec exec deploy/crowdsec-lapi -- cscli decisions delete --all
 
 Changes take effect within ~15 seconds (the bouncer's stream poll interval).
 
-## Unbanning Yourself
-
-`kubectl` access is **not affected** by the bouncer — it goes directly to the k3s API server, not
-through Traefik. You can always run these commands even if your IP is banned:
-
-```bash
-kubectl -n crowdsec exec deploy/crowdsec-lapi -- cscli decisions delete --ip YOUR.PUBLIC.IP
-```
-
-### Emergency: remove bouncer middleware
-
-If completely locked out of web UIs but still have SSH + kubectl:
-
-```bash
-# Option 1: delete the ban
-kubectl -n crowdsec exec deploy/crowdsec-lapi -- cscli decisions delete --ip YOUR.PUBLIC.IP
-
-# Option 2: push a commit removing crowdsec-bouncer from IngressRoutes, then force reconcile
-flux reconcile kustomization infrastructure --with-source
-flux reconcile kustomization apps --with-source
-```
-
 ## Testing
 
 ### Trigger a ban via bad path
