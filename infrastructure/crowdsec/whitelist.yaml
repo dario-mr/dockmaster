@@ -11,3 +11,11 @@ data:
       reason: "admin IP"
       ip:
         - "86.49.252.108"
+        - "46.135.16.188"
+  headlamp-whitelist.yaml: |
+    name: crowdsecurity/headlamp-whitelist
+    description: "Whitelist Headlamp dashboard static plugin requests (expected 404s)"
+    whitelist:
+      reason: "Headlamp static plugin resources that return 404"
+      expression:
+        - evt.Parsed.target_uri startsWith '/dashboard/static-plugins/'

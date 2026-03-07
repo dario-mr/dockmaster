@@ -71,6 +71,10 @@ spec:
           mountPath: /etc/crowdsec/parsers/s02-enrich/my-whitelist.yaml
           subPath: my-whitelist.yaml
           readOnly: true
+        - name: whitelist
+          mountPath: /etc/crowdsec/parsers/s02-enrich/headlamp-whitelist.yaml
+          subPath: headlamp-whitelist.yaml
+          readOnly: true
       env:
         - name: COLLECTIONS
           value: "crowdsecurity/traefik crowdsecurity/http-cve crowdsecurity/base-http-scenarios"
