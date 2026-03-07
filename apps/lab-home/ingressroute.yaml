@@ -7,7 +7,7 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`dariolab.com`) && (Path(`/`) || Path(`/index.html`) || Path(`/favicon.ico`) || PathPrefix(`/assets/`) || PathPrefix(`/icons/`))
+    - match: Host(`${DOMAIN}`) && (Path(`/`) || Path(`/index.html`) || Path(`/favicon.ico`) || PathPrefix(`/assets/`) || PathPrefix(`/icons/`))
       kind: Rule
       services:
         - name: lab-home

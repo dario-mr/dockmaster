@@ -61,7 +61,7 @@ spec:
         passwordKey: admin-password
       "grafana.ini":
         server:
-          root_url: "https://dariolab.com/grafana/"
+          root_url: "https://${DOMAIN}/grafana/"
           serve_from_sub_path: true
       persistence:
         enabled: true

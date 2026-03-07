@@ -131,38 +131,8 @@ curl -o /dev/null -s -w "%{http_code}" https://dariolab.com/
 
 ## Whitelisting
 
-To permanently whitelist an IP, create a whitelist ConfigMap and mount it into the LAPI. Add to
-`helmrelease.yaml` values under `lapi`:
-
-```yaml
-lapi:
-  extraVolumes:
-    - name: whitelist
-      configMap:
-        name: crowdsec-whitelist
-  extraVolumeMounts:
-    - name: whitelist
-      mountPath: /etc/crowdsec/parsers/s02-enrich/my-whitelist.yaml
-      subPath: my-whitelist.yaml
-```
-
-Then create `infrastructure/crowdsec/whitelist.yaml`:
-
-```yaml
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: crowdsec-whitelist
-  namespace: crowdsec
-data:
-  my-whitelist.yaml: |
-    name: my-whitelist
-    description: "Admin IP whitelist"
-    whitelist:
-      reason: "admin"
-      ip:
-        - "YOUR.PUBLIC.IP"
-```
+To permanently whitelist an IP, add it
+to [whitelist.yaml](../infrastructure/crowdsec/whitelist.yaml).
 
 ## Secrets
 

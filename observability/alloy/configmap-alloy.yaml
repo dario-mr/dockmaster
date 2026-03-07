@@ -75,7 +75,7 @@ data:
     loki.source.file "traefik_access" {
     	targets = [{
     		__path__ = "/var/log/traefik/access.log",
-    		host     = "dariolab.com",
+    		host     = "${DOMAIN}",
     		job      = "traefik_access",
     	}]
     	forward_to    = [loki.process.traefik_access.receiver]

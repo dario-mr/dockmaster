@@ -7,7 +7,7 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`dariolab.com`) && PathPrefix(`/grafana/`)
+    - match: Host(`${DOMAIN}`) && PathPrefix(`/grafana/`)
       kind: Rule
       middlewares:
         - name: crowdsec-bouncer
