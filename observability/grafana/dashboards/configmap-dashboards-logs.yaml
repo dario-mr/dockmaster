@@ -1489,7 +1489,7 @@ data:
               },
               "direction": "backward",
               "editorMode": "code",
-              "expr": "{job=\"pod_logs\", app=~\"$app\", level=~\"(?i)$level\"}\n| json\n| trace_id=~\"^${traceId}$\"\n|~ \"(?i)(?:${search:regex}|^$)\"\n| line_format `\n{{- if .logger }}{{ .logger }} - {{ end -}}\n{{- .msg -}}\n{{- if .Failed }}, Failed={{ .Failed }}{{ end -}}\n{{- if .Scanned }} Scanned={{ .Scanned }}{{ end -}}\n{{- if .Updated }} Updated={{ .Updated }}{{ end -}}\n{{- if .notify }} notify={{ .notify }}{{ end -}}\n{{- if .component_id }}{{ printf \"\\ncomponent_id=%s\" .component_id }}{{ end -}}\n{{- if .node_id }}{{ printf \"\\nnode_id=%s\" .node_id }}{{ end -}}\n{{- if .error }}{{ printf \"\\nerror=%s\" .error }}{{- if .query }}{{ printf \"\\nquery=%s\" .query }}{{ end -}}{{ end -}}\n`",
+              "expr": "{job=\"pod_logs\", app=~\"$app\", level=~\"(?i)$level\"}\n| json\n| trace_id=~\"$traceId\"\n|~ \"(?i)(?:$search|^$)\"\n| line_format `\n{{- if .logger }}{{ .logger }} - {{ end -}}\n{{- .msg -}}\n{{- if .Failed }}, Failed={{ .Failed }}{{ end -}}\n{{- if .Scanned }} Scanned={{ .Scanned }}{{ end -}}\n{{- if .Updated }} Updated={{ .Updated }}{{ end -}}\n{{- if .notify }} notify={{ .notify }}{{ end -}}\n{{- if .component_id }}{{ printf \"\\ncomponent_id=%s\" .component_id }}{{ end -}}\n{{- if .node_id }}{{ printf \"\\nnode_id=%s\" .node_id }}{{ end -}}\n{{- if .error }}{{ printf \"\\nerror=%s\" .error }}{{- if .query }}{{ printf \"\\nquery=%s\" .query }}{{ end -}}{{ end -}}\n`",
               "queryType": "range",
               "refId": "JSON apps"
             }
@@ -2031,19 +2031,18 @@ data:
           },
           {
             "current": {
-              "text": ".*",
-              "value": ".*"
+              "text": "",
+              "value": ""
             },
-            "description": ".* to show all logs",
             "name": "traceId",
             "options": [
               {
                 "selected": true,
-                "text": ".*",
-                "value": ".*"
+                "text": "",
+                "value": ""
               }
             ],
-            "query": ".*",
+            "query": "",
             "type": "textbox"
           }
         ]
