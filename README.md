@@ -2,6 +2,73 @@
 
 GitOps-managed k3s cluster for self-hosted applications.
 
+## Architecture
+
+```mermaid
+%%{ init: { "flowchart": { "nodeSpacing": 50, "rankSpacing": 50 } } }%%
+flowchart TD
+    Internet["Internet"]
+
+    subgraph Cluster["k3s Cluster"]
+        subgraph Ingress["Ingress"]
+            Traefik["Traefik<br/>[ingress controller]"]
+        end
+
+        Apps["Apps"]
+
+        subgraph Observability["Observability"]
+            Prometheus["Prometheus<br/>[metrics scraper & db]"]
+            Alloy["Alloy<br/>[log agent]"]
+            Loki["Loki<br/>[log db]"]
+            Grafana["Grafana<br/>[dashboards]"]
+        end
+
+        subgraph Security["Security"]
+            Crowdsec["Crowdsec<br/>[intrusion detection]"]
+        end
+    end
+
+    subgraph GitOps["GitOps"]
+        Flux["Flux<br/>[continuous delivery]"]
+        GitHub["GitHub<br/>[source of truth]"]
+    end
+
+%% traffic
+    Internet --> Traefik
+    Traefik -->|routes to| Apps
+%% security
+    Crowdsec -->|bouncer middleware| Traefik
+%% observability
+    Alloy -->|tails access logs| Traefik
+    Alloy -->|collects pod logs| Apps
+    Alloy -->|ships logs| Loki
+    Grafana -->|queries logs| Loki
+%% metrics
+    Prometheus -->|scrapes metrics| Apps
+    Grafana -->|queries metrics| Prometheus
+%% gitops
+    Flux -->|reconciles| Cluster
+    GitHub -->|notifies| Flux
+%% colors
+    style Cluster fill: #f0f9ff, stroke: #bae6fd
+    style Ingress fill: #fff7ed, stroke: #fed7aa
+    style Observability fill: #e0f2fe, stroke: #93c5fd
+    style Security fill: #e0f2fe, stroke: #93c5fd
+    style GitOps fill: #f0fdf4, stroke: #bbf7d0
+%% normal nodes
+    classDef obs fill: #bae6fd, stroke: #60a5fa, color: #0f172a
+    class Prometheus,Alloy,Loki,Grafana obs
+%% security nodes
+    classDef sec fill: #bae6fd, stroke: #60a5fa, color: #0f172a
+    class Crowdsec sec
+%% main-flow nodes
+    classDef mainFlow fill: #ffedd5, stroke: #fdba74, color: #7c2d12
+    class Internet,Traefik,Apps mainFlow
+%% gitops nodes
+    classDef gitops fill: #bbf7d0, stroke: #86efac, color: #14532d
+    class Flux,GitHub gitops
+```
+
 ## Structure
 
 ```
