@@ -5,6 +5,7 @@ resources:
   - traefik/helmchartconfig.yaml
   - traefik/default-headers.yaml
   - traefik/rate-limit.yaml
+  - traefik/log-truncate-cronjob.yaml
   - crowdsec/namespace.yaml
   - crowdsec/helmrepository.yaml
   - crowdsec/helmrelease.yaml

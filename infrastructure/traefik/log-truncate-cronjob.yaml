@@ -1,0 +1,26 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: traefik-log-truncate
+  namespace: kube-system
+spec:
+  schedule: "0 3 * * *"
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: truncate
+              image: busybox:1.37
+              command: ["/bin/sh", "-c", "cat /dev/null > /var/log/traefik/access.log"]
+              volumeMounts:
+                - name: access-logs
+                  mountPath: /var/log/traefik
+          restartPolicy: OnFailure
+          volumes:
+            - name: access-logs
+              hostPath:
+                path: /var/log/traefik
+                type: Directory
