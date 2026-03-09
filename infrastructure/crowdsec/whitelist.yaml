@@ -18,4 +18,4 @@ data:
     whitelist:
       reason: "Headlamp static plugin resources that return 404"
       expression:
-        - evt.Parsed.target_uri startsWith '/dashboard/static-plugins/'
+        - evt.Parsed.request startsWith '/dashboard/static-plugins/'

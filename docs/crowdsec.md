@@ -32,7 +32,7 @@ Internet --> Traefik (bouncer plugin) --query--> Crowdsec LAPI
 kubectl -n crowdsec get pods
 
 # Agent is parsing Traefik logs
-kubectl -n crowdsec exec deploy/crowdsec-agent -- cscli metrics
+kubectl -n crowdsec exec ds/crowdsec-agent -- cscli metrics
 
 # Bouncer is registered
 kubectl -n crowdsec exec deploy/crowdsec-lapi -- cscli bouncers list
@@ -41,10 +41,10 @@ kubectl -n crowdsec exec deploy/crowdsec-lapi -- cscli bouncers list
 kubectl -n kube-system logs deploy/traefik | grep -i plugin
 
 # List installed scenarios
-kubectl -n crowdsec exec deploy/crowdsec-agent -- cscli scenarios list
+kubectl -n crowdsec exec ds/crowdsec-agent -- cscli scenarios list
 
 # List installed parsers
-kubectl -n crowdsec exec deploy/crowdsec-agent -- cscli parsers list
+kubectl -n crowdsec exec ds/crowdsec-agent -- cscli parsers list
 ```
 
 ## Monitoring Bans
@@ -60,7 +60,7 @@ kubectl -n crowdsec exec deploy/crowdsec-lapi -- cscli alerts list
 kubectl -n crowdsec exec deploy/crowdsec-lapi -- cscli alerts inspect <ALERT_ID>
 
 # Agent metrics (lines parsed, scenarios triggered)
-kubectl -n crowdsec exec deploy/crowdsec-agent -- cscli metrics
+kubectl -n crowdsec exec ds/crowdsec-agent -- cscli metrics
 ```
 
 If enrolled via `enroll-key`, the [Crowdsec Console](https://app.crowdsec.net) provides a web
