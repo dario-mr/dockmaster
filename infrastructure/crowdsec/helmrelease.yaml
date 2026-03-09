@@ -16,6 +16,24 @@ spec:
   values:
     container_runtime: containerd
 
+    config:
+      profiles.yaml: |
+        name: default_ip_remediation
+        filters:
+          - Alert.Remediation == true && Alert.GetScope() == "Ip"
+        duration_expr: Sprintf('%dh', (GetDecisionsCount(Alert.GetValue()) + 1) * 4)
+        decisions:
+          - type: ban
+        on_success: break
+        ---
+        name: default_range_remediation
+        filters:
+          - Alert.Remediation == true && Alert.GetScope() == "Range"
+        duration_expr: Sprintf('%dh', (GetDecisionsCount(Alert.GetValue()) + 1) * 4)
+        decisions:
+          - type: ban
+        on_success: break
+
     lapi:
       env:
         - name: ENROLL_KEY
