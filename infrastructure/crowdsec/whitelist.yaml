@@ -19,3 +19,10 @@ data:
       reason: "Headlamp static plugin resources that return 404"
       expression:
         - evt.Parsed.request startsWith '/dashboard/static-plugins/'
+  inactive-apps-whitelist.yaml: |
+    name: crowdsecurity/inactive-apps-whitelist
+    description: "Whitelist health/info probes for apps not currently deployed"
+    whitelist:
+      reason: "frontend app probing inactive services"
+      expression:
+        - evt.Parsed.request matches '^/(ichiro-family-tree|ichiro-walks|shortly|api-stress-test|htmx-demo|portainer)/'
