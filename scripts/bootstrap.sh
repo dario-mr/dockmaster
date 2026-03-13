@@ -3,7 +3,18 @@ set -euo pipefail
 
 echo "=== Dockmaster Bootstrap ==="
 
-# 1. Configure k3s (kubelet container log rotation)
+# 1. Configure journald retention
+mkdir -p /etc/systemd/journald.conf.d
+cat > /etc/systemd/journald.conf.d/dockmaster.conf <<'CONF'
+[Journal]
+SystemMaxUse=500M
+SystemKeepFree=1G
+MaxRetentionSec=14day
+CONF
+systemctl restart systemd-journald
+echo "[OK] journald retention configured"
+
+# 2. Configure k3s (kubelet container log rotation)
 mkdir -p /etc/rancher/k3s
 cat > /etc/rancher/k3s/config.yaml <<'CONF'
 kubelet-arg:
@@ -12,7 +23,7 @@ kubelet-arg:
 CONF
 echo "[OK] k3s config written"
 
-# 2. Install k3s (idempotent)
+# 3. Install k3s (idempotent)
 if command -v k3s &>/dev/null; then
   echo "[OK] k3s already installed"
 else
@@ -27,7 +38,7 @@ if ! grep -q 'KUBECONFIG=/etc/rancher/k3s/k3s.yaml' ~/.bashrc 2>/dev/null; then
   echo 'export KUBECONFIG=/etc/rancher/k3s/k3s.yaml' >> ~/.bashrc
 fi
 
-# 3. Wait for node to be ready
+# 4. Wait for node to be ready
 echo "[..] Waiting for node to be ready..."
 until kubectl get nodes &>/dev/null; do
   sleep 2
@@ -35,21 +46,21 @@ done
 kubectl wait --for=condition=Ready node --all --timeout=120s
 echo "[OK] Node ready"
 
-# 4. Wait for Traefik to be running
+# 5. Wait for Traefik to be running
 echo "[..] Waiting for Traefik..."
 kubectl wait --for=condition=Available deployment/traefik -n kube-system --timeout=180s
 echo "[OK] Traefik running"
 
-# 5. Prepare Traefik access log directory (Traefik runs as UID 65532)
+# 6. Prepare Traefik access log directory (Traefik runs as UID 65532)
 mkdir -p /var/log/traefik
 chown 65532:65532 /var/log/traefik
 echo "[OK] Traefik access log directory ready"
 
-# 6. Create apps namespace (so secrets can be applied before Flux runs)
+# 7. Create apps namespace (so secrets can be applied before Flux runs)
 kubectl create namespace apps --dry-run=client -o yaml | kubectl apply -f -
 echo "[OK] Namespace 'apps' ensured"
 
-# 7. Install Flux CLI (idempotent)
+# 8. Install Flux CLI (idempotent)
 if command -v flux &>/dev/null; then
   echo "[OK] Flux CLI already installed"
 else
@@ -58,7 +69,7 @@ else
   echo "[OK] Flux CLI installed"
 fi
 
-# 8. Check GITHUB_TOKEN
+# 9. Check GITHUB_TOKEN
 if [ -z "${GITHUB_TOKEN:-}" ]; then
   echo "[ERROR] GITHUB_TOKEN environment variable is not set."
   echo "  Export it before running this script:"
@@ -66,7 +77,7 @@ if [ -z "${GITHUB_TOKEN:-}" ]; then
   exit 1
 fi
 
-# 9. Bootstrap Flux
+# 10. Bootstrap Flux
 echo "[..] Bootstrapping Flux..."
 flux bootstrap github \
   --owner=dario-mr \
@@ -76,7 +87,7 @@ flux bootstrap github \
   --personal
 echo "[OK] Flux bootstrapped"
 
-# 10. Verification
+# 11. Verification
 echo ""
 echo "=== Verification ==="
 echo "Run these commands to verify the setup:"

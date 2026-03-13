@@ -18,7 +18,8 @@ spec:
       enabled: false
     prometheus:
       prometheusSpec:
-        retention: 30d
+        retention: 14d
+        retentionSize: 5GB
         scrapeInterval: 30s
         storageSpec:
           volumeClaimTemplate:
