@@ -11,7 +11,6 @@ resources:
   - wordle-duel-service-redis/deployment.yaml
   - wordle-duel-service-redis/service.yaml
   - wordle-duel-service-redis/pvc.yaml
-  - wordle-duel-service-redis/pvc-longhorn.yaml
   - wordle-duel/deployment.yaml
   - wordle-duel/service.yaml
   - wordle-duel/ingressroute.yaml
