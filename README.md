@@ -105,8 +105,7 @@ docs/                      Documentation (secrets inventory, Crowdsec operations
 
 ## Prerequisites
 
-- VPS with ports 80 and 443 open
-- DNS A record for `dariolab.com` pointing to VPS IP
+- `DNS A` record for your domain pointing to VPS IP
 - GitHub Personal Access Token with repo permissions for flux
 
 ## Quick Start
@@ -126,18 +125,22 @@ docs/                      Documentation (secrets inventory, Crowdsec operations
    # Edit secrets with real values
    ```
 
-3. **Run bootstrap:**
+3. **Set your domain:**
+   Update `DOMAIN` in [kustomization.yaml](clusters/production/kustomization.yaml) so it matches the
+   DNS record you created.
+
+4. **Run bootstrap:**
    ```bash
    export GITHUB_TOKEN=ghp_your_token_here
    sudo -E bash scripts/bootstrap.sh
    ```
 
-4. **Apply secrets:**
+5. **Apply secrets:**
    ```bash
    sudo bash scripts/apply-secrets.sh
    ```
 
-5. **Verify:**
+6. **Verify:**
    ```bash
    flux get kustomizations
    kubectl get pods -A
