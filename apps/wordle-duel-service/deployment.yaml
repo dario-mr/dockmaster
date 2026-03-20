@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: wordle-duel-service
-          image: dariomr8/wordle-duel-service:0.13.1
+          image: dariomr8/wordle-duel-service:0.13.2
           ports:
             - containerPort: 8088
           envFrom:
