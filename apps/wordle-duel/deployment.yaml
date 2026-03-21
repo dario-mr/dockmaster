@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: wordle-duel
-          image: dariomr8/wordle-duel:0.10.1
+          image: dariomr8/wordle-duel:0.10.2
           ports:
             - containerPort: 80
           livenessProbe:
