@@ -49,6 +49,7 @@ spec:
       type: ClusterIP
     persistence:
       enabled: true
+      storageClass: local-path
     ingressRoute:
       dashboard:
         enabled: false

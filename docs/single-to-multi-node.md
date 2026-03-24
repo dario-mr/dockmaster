@@ -12,13 +12,13 @@ infrastructure --> observability --> apps
 Progress so far toward multi-node:
 
 - Longhorn is installed and healthy via Flux in `longhorn-system`
-- `local-path` is still the default StorageClass
+- StorageClasses are now managed explicitly in Git
 - Redis has already been migrated to a Longhorn-backed PVC
 - Crowdsec LAPI data and config are now targeted to Longhorn-backed PVCs
 - Grafana is now targeted to a Longhorn-backed PVC
 - Loki is now targeted to a Longhorn-backed PVC
 - Prometheus is now targeted to a Longhorn-backed PVC
-- Traefik TLS storage still uses `local-path`
+- Traefik TLS storage still uses `local-path`, even when Longhorn is made the default
 - `bootstrap.sh` now installs Longhorn prerequisites (`open-iscsi`) for future nodes
 
 ### Component Overview
@@ -46,13 +46,13 @@ Three architectural choices tie this cluster to a single node:
 
 **1. Remaining local-path storage**
 
-Most persistent workloads still use the k3s default `local-path` provisioner with `ReadWriteOnce`
-access mode. Data lives on the node's local disk with no replication. If a pod gets rescheduled to
-a different node, it cannot follow its data.
+Traefik is the only remaining workload still using the k3s `local-path` provisioner with
+`ReadWriteOnce` access mode. Its data lives on the node's local disk with no replication. If the
+pod gets rescheduled to a different node, it cannot follow its data.
 
 Redis, Crowdsec LAPI, Grafana, Loki, and Prometheus are the current exceptions: they run on
-Longhorn PVCs. Longhorn is installed but not yet the default StorageClass, so the cluster is
-currently in a mixed-storage transitional state.
+Longhorn PVCs. The cluster is still in a mixed-storage transitional state, but only because Traefik
+is intentionally pinned to `local-path` for now.
 
 **2. hostPath + hostPort networking**
 
@@ -130,9 +130,11 @@ k3s. It replicates volumes across nodes, so pods can be rescheduled freely.
 - Done: Prometheus (10Gi)
 - Remaining: Traefik acme.json (TLS certificates)
 
-Migration path: Longhorn is already installed. The remaining work is to migrate each PVC to
-Longhorn, then optionally switch the default StorageClass once the cluster is ready. Alternatively,
-use Longhorn's built-in backup/restore where preserving data matters.
+Migration path: Longhorn is already installed and all major app and observability PVCs are already
+on Longhorn. The default StorageClass can now be switched to Longhorn safely because Traefik is
+explicitly pinned to `local-path`. The remaining storage decision is whether to keep Traefik on
+local-path temporarily or replace `acme.json` with cert-manager entirely. Alternatively, use
+Longhorn's built-in backup/restore where preserving data matters.
 
 ### 3. Replace klipper with MetalLB
 
@@ -207,7 +209,8 @@ Options:
 - Use a single Traefik instance for TLS termination (defeats the purpose of multi-node)
 
 **Recommendation:** cert-manager. It's the standard Kubernetes approach, eliminates the acme.json
-file entirely, and works naturally with any number of Traefik replicas.
+file entirely, and works naturally with any number of Traefik replicas. Until then, Traefik can
+remain pinned to `local-path` even if Longhorn is the cluster default.
 
 ---
 
@@ -225,9 +228,9 @@ file entirely, and works naturally with any number of Traefik replicas.
 | 8    | Update bootstrap.sh for multi-node     | Low    | None                          |
 
 Step 1 is complete and Redis, Crowdsec LAPI, Grafana, Loki, plus Prometheus are already migrated as
-part of step 2. The remaining PVC migrations can still be done on the existing single node before
-adding more nodes. Step 3 is the point of no return — after converting to etcd, the cluster is
-ready to accept new members.
+part of step 2. The only remaining local-path storage is Traefik's `acme.json`, which can stay on
+`local-path` temporarily because it is explicitly pinned there. Step 3 is the point of no return —
+after converting to etcd, the cluster is ready to accept new members.
 
 ---
 
