@@ -12,6 +12,8 @@ resources:
   - crowdsec/namespace.yaml
   - crowdsec/helmrepository.yaml
   - crowdsec/helmrelease.yaml
+  - crowdsec/pvc-config-longhorn.yaml
+  - crowdsec/pvc-data-longhorn.yaml
   - crowdsec/acquis.yaml
   - crowdsec/whitelist.yaml
   - crowdsec/bouncer-middleware.yaml

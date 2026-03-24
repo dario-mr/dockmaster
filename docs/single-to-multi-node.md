@@ -14,7 +14,8 @@ Progress so far toward multi-node:
 - Longhorn is installed and healthy via Flux in `longhorn-system`
 - `local-path` is still the default StorageClass
 - Redis has already been migrated to a Longhorn-backed PVC
-- Crowdsec, Grafana, Prometheus, Loki, and Traefik TLS storage still use `local-path`
+- Crowdsec LAPI data and config are now targeted to Longhorn-backed PVCs
+- Grafana, Prometheus, Loki, and Traefik TLS storage still use `local-path`
 - `bootstrap.sh` now installs Longhorn prerequisites (`open-iscsi`) for future nodes
 
 ### Component Overview
@@ -22,7 +23,7 @@ Progress so far toward multi-node:
 | Layer          | Component             | Type        | Replicas | Storage         |
 |----------------|-----------------------|-------------|----------|-----------------|
 | Infrastructure | Traefik (k3s-bundled) | Deployment  | 1        | local-path PVC  |
-| Infrastructure | Crowdsec LAPI         | Deployment  | 1        | 1Gi + 100Mi PVC |
+| Infrastructure | Crowdsec LAPI         | Deployment  | 1        | 1Gi + 100Mi Longhorn PVC |
 | Infrastructure | Crowdsec Agent        | Deployment  | 1        | -               |
 | Infrastructure | Headlamp              | Deployment  | 1        | -               |
 | Observability  | Prometheus            | StatefulSet | 1        | 10Gi PVC        |
@@ -46,8 +47,9 @@ Most persistent workloads still use the k3s default `local-path` provisioner wit
 access mode. Data lives on the node's local disk with no replication. If a pod gets rescheduled to
 a different node, it cannot follow its data.
 
-Redis is the exception: it already runs on a Longhorn PVC. Longhorn is installed but not yet the
-default StorageClass, so the cluster is currently in a mixed-storage transitional state.
+Redis and Crowdsec LAPI are the current exceptions: they run on Longhorn PVCs. Longhorn is
+installed but not yet the default StorageClass, so the cluster is currently in a mixed-storage
+transitional state.
 
 **2. hostPath + hostPort networking**
 
@@ -119,10 +121,10 @@ k3s. It replicates volumes across nodes, so pods can be rescheduled freely.
 **PVC status:**
 
 - Done: Redis (1Gi)
+- Done: Crowdsec LAPI data (1Gi) + config (100Mi)
 - Remaining: Prometheus (10Gi)
 - Remaining: Grafana (2Gi)
 - Remaining: Loki (10Gi)
-- Remaining: Crowdsec LAPI data (1Gi) + config (100Mi)
 - Remaining: Traefik acme.json (TLS certificates)
 
 Migration path: Longhorn is already installed. The remaining work is to migrate each PVC to
@@ -219,9 +221,10 @@ file entirely, and works naturally with any number of Traefik replicas.
 | 7    | Convert Crowdsec Agent to DaemonSet    | Low    | None                          |
 | 8    | Update bootstrap.sh for multi-node     | Low    | None                          |
 
-Step 1 is complete and Redis is already migrated as part of step 2. The remaining PVC migrations
-can still be done on the existing single node before adding more nodes. Step 3 is the point of no
-return — after converting to etcd, the cluster is ready to accept new members.
+Step 1 is complete and Redis plus Crowdsec LAPI are already migrated as part of step 2. The
+remaining PVC migrations can still be done on the existing single node before adding more nodes.
+Step 3 is the point of no return — after converting to etcd, the cluster is ready to accept new
+members.
 
 ---
 

@@ -57,11 +57,11 @@ spec:
       persistentVolume:
         data:
           enabled: true
-          storageClassName: local-path
+          existingClaim: crowdsec-db-pvc-longhorn
           size: 1Gi
         config:
           enabled: true
-          storageClassName: local-path
+          existingClaim: crowdsec-config-pvc-longhorn
           size: 100Mi
       resources:
         limits:
