@@ -19,7 +19,10 @@ Progress so far toward multi-node:
 - Loki is now targeted to a Longhorn-backed PVC
 - Prometheus is now targeted to a Longhorn-backed PVC
 - Traefik TLS storage still uses `local-path`, even when Longhorn is made the default
-- `bootstrap.sh` now installs Longhorn prerequisites (`open-iscsi`) for future nodes
+- `bootstrap.sh` now always creates the first server with embedded etcd (`--cluster-init`)
+- `join-node.sh` now handles additional node joins as either a server or an agent
+- both scripts install Longhorn prerequisites (`open-iscsi`), raise inotify limits, and prepare
+  `/var/log/traefik` on every node
 
 ### Component Overview
 
@@ -107,7 +110,9 @@ curl -sfL https://get.k3s.io | K3S_URL=https://<server>:6443 \
 Minimum 3 server nodes recommended for etcd quorum. A 2-server setup has no fault tolerance
 advantage over 1.
 
-**Impact:** bootstrap.sh must be updated to support both init and join flows.
+**Current status:** the scripts now cover both first-server setup and node joins for fresh nodes,
+with the first server always bootstrapped on embedded etcd. The remaining work is applying that
+model to the current live cluster.
 
 ### 2. Finish replacing local-path with Longhorn
 
@@ -184,16 +189,37 @@ state.
 
 ### 5. Update bootstrap script
 
-The current `bootstrap.sh` assumes a single fresh node. For multi-node:
+The current setup now uses two scripts:
 
-- Support `--cluster-init` for first server
-- Support join token flow for additional servers and agents
+- `bootstrap.sh` for the first server (always embedded etcd / `--cluster-init`)
+- `join-node.sh` for additional nodes joining an existing cluster
 - Create `/var/log/traefik` with `chown 65532:65532` on **every** node
 - Install Longhorn prerequisites (open-iscsi) on every node
 - Flux bootstrap only runs once (on the first server)
 
-Current status: `bootstrap.sh` already installs `open-iscsi` and enables `iscsid`, but it still
-needs the multi-node init/join flow changes.
+Current status: done. Together, the scripts now:
+
+- bootstraps the first server directly on embedded etcd
+- supports server joins with `join-node.sh --server-url` + `--token`
+- supports agent joins with `join-node.sh --agent --server-url` + `--token`
+- creates `/var/log/traefik` on every node
+- installs Longhorn prerequisites and inotify tuning on every node
+- bootstraps Flux only on the first server
+
+This does **not** automate the in-place conversion of the current live single-node SQLite cluster to
+embedded etcd. That migration step is still pending and should be treated separately. On a brand
+new cluster, `bootstrap.sh` now avoids that later conversion by using embedded etcd from the start.
+
+**Server vs. agent joins:**
+
+- A **server** node joins the control plane. After the SQLite-to-etcd conversion, server nodes
+  participate in etcd quorum and improve cluster control-plane resilience. Server nodes can also
+  run regular workloads unless tainted.
+- An **agent** node joins only as a worker. It increases scheduling capacity for workloads but does
+  not improve control-plane availability.
+
+Practical rule: add **server** nodes when you want HA for the cluster itself; add **agent** nodes
+when you only want more room for workloads.
 
 ### 6. TLS certificate sharing
 
@@ -225,12 +251,14 @@ remain pinned to `local-path` even if Longhorn is the cluster default.
 | 5    | Install MetalLB, reconfigure Traefik   | Medium | Brief (DNS + Traefik restart) |
 | 6    | Install cert-manager, remove acme.json | Medium | Brief (cert reissue)          |
 | 7    | Convert Crowdsec Agent to DaemonSet    | Low    | None                          |
-| 8    | Update bootstrap.sh for multi-node     | Low    | None                          |
+| 8    | Update bootstrap/join scripts          | Done   | None                          |
 
 Step 1 is complete and Redis, Crowdsec LAPI, Grafana, Loki, plus Prometheus are already migrated as
 part of step 2. The only remaining local-path storage is Traefik's `acme.json`, which can stay on
 `local-path` temporarily because it is explicitly pinned there. Step 3 is the point of no return —
-after converting to etcd, the cluster is ready to accept new members.
+after converting to etcd, the cluster is ready to accept new members. Step 8 is also complete, so
+new clusters can start directly on embedded etcd and additional nodes can already be joined with
+the intended server and agent flows.
 
 ---
 

@@ -6,6 +6,14 @@ echo "=== Dockmaster Bootstrap ==="
 
 REQUIRED_APT_PACKAGES=(curl git open-iscsi ufw)
 
+usage() {
+  cat <<'EOF'
+Usage:
+  sudo -E bash scripts/bootstrap.sh
+    Install the first server for the cluster with embedded etcd and bootstrap Flux.
+EOF
+}
+
 log_step() {
   echo "[..] $1"
 }
@@ -18,6 +26,29 @@ require_command() {
   local cmd="$1"
   if ! command -v "$cmd" &>/dev/null; then
     echo "[ERROR] Required command '$cmd' is not available"
+    exit 1
+  fi
+}
+
+parse_args() {
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      -h|--help)
+        usage
+        exit 0
+        ;;
+      *)
+        echo "[ERROR] Unknown argument: $1"
+        usage
+        exit 1
+        ;;
+    esac
+  done
+}
+
+require_root() {
+  if [[ "${EUID}" -ne 0 ]]; then
+    echo "[ERROR] This script must be run as root (use sudo)"
     exit 1
   fi
 }
@@ -54,6 +85,28 @@ allow_ufw_rule_if_missing() {
   fi
 }
 
+local_node_name() {
+  if [[ -n "${K3S_NODE_NAME:-}" ]]; then
+    echo "$K3S_NODE_NAME"
+  else
+    hostname
+  fi
+}
+
+wait_for_local_node_ready() {
+  local node_name
+  node_name="$(local_node_name)"
+
+  log_step "Waiting for node '$node_name' to register..."
+  until kubectl get node "$node_name" >/dev/null 2>&1; do
+    sleep 2
+  done
+
+  log_step "Waiting for node '$node_name' to be ready..."
+  kubectl wait --for=condition=Ready "node/$node_name" --timeout=180s
+  log_ok "Node '$node_name' ready"
+}
+
 wait_for_kustomization_ready() {
   local name="$1"
   log_step "Waiting for Flux kustomization '$name'..."
@@ -75,6 +128,36 @@ ensure_secret_exists() {
     exit 1
   fi
 }
+
+setup_traefik_log_dir() {
+  mkdir -p /var/log/traefik
+  chown 65532:65532 /var/log/traefik
+  log_ok "Traefik access log directory ready"
+}
+
+configure_k3s_base_config() {
+  mkdir -p /etc/rancher/k3s
+  cat > /etc/rancher/k3s/config.yaml <<'CONF'
+kubelet-arg:
+  - "container-log-max-files=3"
+  - "container-log-max-size=10Mi"
+CONF
+  log_ok "k3s config written"
+}
+
+install_k3s() {
+  if systemctl is-enabled k3s >/dev/null 2>&1 || systemctl is-active k3s >/dev/null 2>&1; then
+    log_ok "k3s already installed"
+    return
+  fi
+
+  log_step "Installing k3s (first server / embedded etcd)..."
+  curl -sfL https://get.k3s.io | sh -s - server --cluster-init
+  log_ok "k3s installed"
+}
+
+parse_args "$@"
+require_root
 
 install_apt_packages_if_missing "${REQUIRED_APT_PACKAGES[@]}"
 require_command awk
@@ -129,23 +212,11 @@ else
   log_ok "ufw enabled"
 fi
 
-# Configure k3s (kubelet container log rotation)
-mkdir -p /etc/rancher/k3s
-cat > /etc/rancher/k3s/config.yaml <<'CONF'
-kubelet-arg:
-  - "container-log-max-files=3"
-  - "container-log-max-size=10Mi"
-CONF
-echo "[OK] k3s config written"
+# Prepare Traefik access log directory on every node.
+setup_traefik_log_dir
 
-# Install k3s
-if command -v k3s &>/dev/null; then
-  echo "[OK] k3s already installed"
-else
-  echo "[..] Installing k3s..."
-  curl -sfL https://get.k3s.io | sh -
-  echo "[OK] k3s installed"
-fi
+configure_k3s_base_config
+install_k3s
 
 # Make kubeconfig available for the current shell and the invoking user.
 lookup_passwd_field() {
@@ -197,23 +268,11 @@ setup_user_kubeconfig() {
 TARGET_USER="${SUDO_USER:-$(id -un)}"
 setup_user_kubeconfig "$TARGET_USER"
 
-# Wait for node to be ready
-log_step "Waiting for node to be ready..."
-until kubectl get nodes &>/dev/null; do
-  sleep 2
-done
-kubectl wait --for=condition=Ready node --all --timeout=120s
-log_ok "Node ready"
+wait_for_local_node_ready
 
-# Wait for Traefik to be running
 log_step "Waiting for Traefik..."
 kubectl wait --for=condition=Available deployment/traefik -n kube-system --timeout=180s
 log_ok "Traefik running"
-
-# Prepare Traefik access log directory (Traefik runs as UID 65532)
-mkdir -p /var/log/traefik
-chown 65532:65532 /var/log/traefik
-echo "[OK] Traefik access log directory ready"
 
 # Create apps namespace (so secrets can be applied before Flux runs)
 kubectl create namespace apps --dry-run=client -o yaml | kubectl apply -f -
@@ -237,7 +296,7 @@ if [ -z "${GITHUB_TOKEN:-}" ]; then
   exit 1
 fi
 
-# Bootstrap Flux
+# Bootstrap Flux only on the first server.
 log_step "Bootstrapping Flux..."
 flux bootstrap github \
   --owner=dario-mr \

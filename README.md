@@ -107,10 +107,11 @@ docs/                      Documentation (secrets inventory, Crowdsec operations
 
 - `DNS A` record for your domain pointing to VPS IP
 - GitHub Personal Access Token with repo permissions for flux
+- Ubuntu/Debian VPS with `sudo` access for the first server
 
 ## Quick Start
 
-1. **Clone the repo on the VPS:**
+1. **Clone the repo on the first server:**
    ```bash
    git clone https://github.com/dario-mr/dockmaster.git
    cd dockmaster
@@ -129,7 +130,7 @@ docs/                      Documentation (secrets inventory, Crowdsec operations
    Update `DOMAIN` in [kustomization.yaml](clusters/production/kustomization.yaml) so it matches the
    DNS record you created.
 
-4. **Run bootstrap:**
+4. **Bootstrap the first server:**
    ```bash
    export GITHUB_TOKEN=ghp_your_token_here
    sudo -E bash scripts/bootstrap.sh
@@ -151,6 +152,31 @@ docs/                      Documentation (secrets inventory, Crowdsec operations
    flux get kustomizations
    kubectl get pods -A
    ```
+
+## Join Additional Nodes
+
+Use [scripts/join-node.sh](scripts/join-node.sh) after the first server is up.
+
+- **Join an additional server node**
+  ```bash
+  sudo -E bash scripts/join-node.sh \
+    --server-url https://<first-server>:6443 \
+    --token <node-token>
+  ```
+- **Join an agent node**
+  ```bash
+  sudo -E bash scripts/join-node.sh \
+    --agent \
+    --server-url https://<first-server>:6443 \
+    --token <node-token>
+  ```
+
+Server vs. agent:
+
+- A **server** joins the control plane and, once the cluster is on embedded etcd, contributes to
+  control-plane resilience.
+- An **agent** joins only as a worker and adds workload capacity without improving control-plane
+  availability.
 
 See [docs/secrets-inventory.md](docs/secrets-inventory.md) for all required secret values.
 See [docs/crowdsec.md](docs/crowdsec.md) for Crowdsec operations and troubleshooting.
