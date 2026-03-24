@@ -142,6 +142,7 @@ docs/                      Documentation (secrets inventory, Crowdsec operations
 
 6. **Verify:**
    ```bash
+   sudo bash scripts/verify.sh
    flux get kustomizations
    kubectl get pods -A
    ```
@@ -152,6 +153,9 @@ See [docs/crowdsec.md](docs/crowdsec.md) for Crowdsec operations and troubleshoo
 ## Operations
 
 ```bash
+# Full post-bootstrap verification
+sudo bash scripts/verify.sh
+
 # Check Flux reconciliation status
 flux get kustomizations
 
