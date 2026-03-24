@@ -1,10 +1,11 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - flux-system
-  - apps.yaml
-  - infrastructure.yaml
-  - observability.yaml
+- flux-system
+- apps.yaml
+- cert-manager-resources.yaml
+- infrastructure.yaml
+- observability.yaml
 patches:
   - target:
       kind: Kustomization

@@ -19,10 +19,13 @@ Progress so far toward multi-node:
 - Loki is now targeted to a Longhorn-backed PVC
 - Prometheus is now targeted to a Longhorn-backed PVC
 - Traefik TLS storage still uses `local-path`, even when Longhorn is made the default
+- The live cluster has already been converted from SQLite to embedded etcd
 - `bootstrap.sh` now always creates the first server with embedded etcd (`--cluster-init`)
 - `join-node.sh` now handles additional node joins as either a server or an agent
 - both scripts install Longhorn prerequisites (`open-iscsi`), raise inotify limits, and prepare
   `/var/log/traefik` on every node
+- cert-manager is now introduced for Traefik TLS, with staging and production issuers plus a shared
+  default `TLSStore` certificate prepared in `kube-system`
 
 ### Component Overview
 
@@ -45,7 +48,7 @@ Progress so far toward multi-node:
 
 ### What Makes It Single-Node
 
-Three architectural choices tie this cluster to a single node:
+Two architectural choices still tie this cluster to a single node:
 
 **1. Remaining local-path storage**
 
@@ -71,9 +74,10 @@ Alloy  -- reads -->  /var/log/traefik/access.log
 
 This only works when all three run on the same node.
 
-**3. k3s with embedded SQLite**
+**3. Single server count**
 
-The default k3s datastore is SQLite, which supports exactly one server node.
+The cluster now runs on embedded etcd, so the datastore is ready for multiple server nodes. It is
+still effectively single-node only because there is currently just one server in the cluster.
 
 ### What Already Works Multi-Node
 
@@ -95,7 +99,7 @@ SQLite supports only a single server. Embedded etcd supports multiple server (co
 with built-in leader election and data replication.
 
 ```bash
-# First server (converts from SQLite to etcd)
+# First server
 curl -sfL https://get.k3s.io | sh -s - server --cluster-init
 
 # Additional server nodes
@@ -110,9 +114,8 @@ curl -sfL https://get.k3s.io | K3S_URL=https://<server>:6443 \
 Minimum 3 server nodes recommended for etcd quorum. A 2-server setup has no fault tolerance
 advantage over 1.
 
-**Current status:** the scripts now cover both first-server setup and node joins for fresh nodes,
-with the first server always bootstrapped on embedded etcd. The remaining work is applying that
-model to the current live cluster.
+**Current status:** done. The live cluster is already running on embedded etcd, and the scripts now
+cover both first-server setup and node joins for fresh nodes.
 
 ### 2. Finish replacing local-path with Longhorn
 
@@ -206,15 +209,13 @@ Current status: done. Together, the scripts now:
 - installs Longhorn prerequisites and inotify tuning on every node
 - bootstraps Flux only on the first server
 
-This does **not** automate the in-place conversion of the current live single-node SQLite cluster to
-embedded etcd. That migration step is still pending and should be treated separately. On a brand
-new cluster, `bootstrap.sh` now avoids that later conversion by using embedded etcd from the start.
+The live cluster has already been converted in place from SQLite to embedded etcd. On a brand new
+cluster, `bootstrap.sh` avoids that later conversion by using embedded etcd from the start.
 
 **Server vs. agent joins:**
 
-- A **server** node joins the control plane. After the SQLite-to-etcd conversion, server nodes
-  participate in etcd quorum and improve cluster control-plane resilience. Server nodes can also
-  run regular workloads unless tainted.
+- A **server** node joins the control plane. Server nodes participate in etcd quorum and improve
+  cluster control-plane resilience. Server nodes can also run regular workloads unless tainted.
 - An **agent** node joins only as a worker. It increases scheduling capacity for workloads but does
   not improve control-plane availability.
 
@@ -235,8 +236,10 @@ Options:
 - Use a single Traefik instance for TLS termination (defeats the purpose of multi-node)
 
 **Recommendation:** cert-manager. It's the standard Kubernetes approach, eliminates the acme.json
-file entirely, and works naturally with any number of Traefik replicas. Until then, Traefik can
-remain pinned to `local-path` even if Longhorn is the cluster default.
+file entirely, and works naturally with any number of Traefik replicas. cert-manager is now staged
+in the repo with both Let's Encrypt issuers and a shared Traefik `TLSStore` certificate. The
+remaining cutover is to switch IngressRoutes off `certResolver`, verify Traefik serves the
+cert-manager secret, and then remove the old ACME flags and PVC.
 
 ---
 
@@ -246,7 +249,7 @@ remain pinned to `local-path` even if Longhorn is the cluster default.
 |------|----------------------------------------|--------|-------------------------------|
 | 1    | Install Longhorn alongside local-path  | Done   | None                          |
 | 2    | Migrate remaining PVCs to Longhorn     | Medium | Per-service restart           |
-| 3    | Switch k3s to embedded etcd            | High   | Cluster restart               |
+| 3    | Switch k3s to embedded etcd            | Done   | Cluster restart               |
 | 4    | Join additional server nodes           | Low    | None                          |
 | 5    | Install MetalLB, reconfigure Traefik   | Medium | Brief (DNS + Traefik restart) |
 | 6    | Install cert-manager, remove acme.json | Medium | Brief (cert reissue)          |
@@ -255,10 +258,10 @@ remain pinned to `local-path` even if Longhorn is the cluster default.
 
 Step 1 is complete and Redis, Crowdsec LAPI, Grafana, Loki, plus Prometheus are already migrated as
 part of step 2. The only remaining local-path storage is Traefik's `acme.json`, which can stay on
-`local-path` temporarily because it is explicitly pinned there. Step 3 is the point of no return —
-after converting to etcd, the cluster is ready to accept new members. Step 8 is also complete, so
-new clusters can start directly on embedded etcd and additional nodes can already be joined with
-the intended server and agent flows.
+`local-path` temporarily because it is explicitly pinned there. Step 3 is also complete, so the
+cluster is now ready to accept additional server or agent nodes. Step 8 is complete as well, so
+new clusters can start directly on embedded etcd and additional nodes can be joined with the
+intended server and agent flows.
 
 ---
 

@@ -4,6 +4,9 @@ resources:
   - namespaces/apps.yaml
   - storageclasses/local-path.yaml
   - storageclasses/longhorn.yaml
+  - cert-manager/namespace.yaml
+  - cert-manager/helmrepository.yaml
+  - cert-manager/helmrelease.yaml
   - longhorn/namespace.yaml
   - longhorn/helmrepository.yaml
   - longhorn/helmrelease.yaml
