@@ -71,6 +71,7 @@ spec:
           memory: 128Mi
 
     agent:
+      isDeployment: false
       additionalAcquisition:
         - source: file
           filenames:
