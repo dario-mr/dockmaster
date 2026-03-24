@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+trap 'echo "[ERROR] Command failed at line ${LINENO}: ${BASH_COMMAND}"' ERR
 
 echo "=== Dockmaster Bootstrap ==="
 
@@ -60,11 +61,55 @@ else
   echo "[OK] k3s installed"
 fi
 
-# Make kubeconfig available (persist for future shells)
-export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
-if ! grep -q 'KUBECONFIG=/etc/rancher/k3s/k3s.yaml' ~/.bashrc 2>/dev/null; then
-  echo 'export KUBECONFIG=/etc/rancher/k3s/k3s.yaml' >> ~/.bashrc
-fi
+# Make kubeconfig available for the current shell and the invoking user.
+lookup_passwd_field() {
+  local user_name="$1"
+  local field_index="$2"
+
+  awk -F: -v user_name="$user_name" -v field_index="$field_index" '$1 == user_name { print $field_index; exit }' /etc/passwd
+}
+
+setup_user_kubeconfig() {
+  local target_user="$1"
+  local home_dir
+  local login_shell
+  local shell_rc
+
+  home_dir="$(lookup_passwd_field "$target_user" 6)"
+  login_shell="$(lookup_passwd_field "$target_user" 7)"
+
+  if [ -z "$home_dir" ]; then
+    echo "[ERROR] Could not determine home directory for user '$target_user'"
+    exit 1
+  fi
+
+  install -d -m 700 -o "$target_user" -g "$target_user" "$home_dir/.kube"
+  install -m 600 -o "$target_user" -g "$target_user" /etc/rancher/k3s/k3s.yaml "$home_dir/.kube/config"
+
+  case "${login_shell##*/}" in
+    zsh)
+      shell_rc="$home_dir/.zshrc"
+      ;;
+    bash)
+      shell_rc="$home_dir/.bashrc"
+      ;;
+    *)
+      shell_rc="$home_dir/.profile"
+      ;;
+  esac
+
+  touch "$shell_rc"
+  chown "$target_user:$target_user" "$shell_rc"
+  if ! grep -q 'export KUBECONFIG=\$HOME/.kube/config' "$shell_rc" 2>/dev/null; then
+    echo 'export KUBECONFIG=$HOME/.kube/config' >> "$shell_rc"
+  fi
+
+  export KUBECONFIG="$home_dir/.kube/config"
+  echo "[OK] kubeconfig installed for user '$target_user' at $KUBECONFIG"
+}
+
+TARGET_USER="${SUDO_USER:-$(id -un)}"
+setup_user_kubeconfig "$TARGET_USER"
 
 # Wait for node to be ready
 echo "[..] Waiting for node to be ready..."
@@ -113,6 +158,8 @@ flux bootstrap github \
   --branch=main \
   --path=clusters/production \
   --personal
+kubectl wait --for=condition=Available deployment --all -n flux-system --timeout=180s
+flux check --pre=false
 echo "[OK] Flux bootstrapped"
 
 # Verification

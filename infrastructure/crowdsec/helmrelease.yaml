@@ -5,6 +5,12 @@ metadata:
   namespace: crowdsec
 spec:
   interval: 30m
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
   chart:
     spec:
       chart: crowdsec
