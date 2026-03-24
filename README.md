@@ -140,7 +140,12 @@ docs/                      Documentation (secrets inventory, Crowdsec operations
    sudo bash scripts/apply-secrets.sh
    ```
 
-6. **Verify:**
+6. **Resume observability and apps:**
+   ```bash
+   sudo bash scripts/reconcile-apps.sh
+   ```
+
+7. **Verify:**
    ```bash
    sudo bash scripts/verify.sh
    flux get kustomizations
