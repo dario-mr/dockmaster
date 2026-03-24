@@ -24,8 +24,8 @@ Progress so far toward multi-node:
 - `join-node.sh` now handles additional node joins as either a server or an agent
 - both scripts install Longhorn prerequisites (`open-iscsi`), raise inotify limits, and prepare
   `/var/log/traefik` on every node
-- cert-manager is now introduced for Traefik TLS, with staging and production issuers plus a shared
-  default `TLSStore` certificate prepared in `kube-system`
+- cert-manager now manages Traefik TLS with a production issuer and a shared default `TLSStore`
+  certificate in `kube-system`
 
 ### Component Overview
 
@@ -217,11 +217,11 @@ when you only want more room for workloads.
 Traefik now uses cert-manager-issued certificates from Kubernetes Secrets instead of storing Let's
 Encrypt state in `acme.json`.
 
-Current status: done. cert-manager is installed with both staging and production issuers, the shared
-Traefik `TLSStore` certificate is issued, and IngressRoutes no longer depend on Traefik's ACME
-resolver. One implementation detail remains important for the future: global entrypoint-level
-HTTP→HTTPS redirects in Traefik interfere with cert-manager HTTP-01 challenges, so that redirect
-cannot live at the static entrypoint level while HTTP-01 issuance is in use.
+Current status: done. cert-manager is installed with a production issuer, the shared Traefik
+`TLSStore` certificate is issued, and IngressRoutes no longer depend on Traefik's ACME resolver.
+One implementation detail remains important for the future: global entrypoint-level HTTP→HTTPS
+redirects in Traefik interfere with cert-manager HTTP-01 challenges, so that redirect cannot live
+at the static entrypoint level while HTTP-01 issuance is in use.
 
 ---
 
