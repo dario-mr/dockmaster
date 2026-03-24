@@ -9,6 +9,14 @@ GitOps-managed stack using Flux CD, with a three-tier dependency chain:
 infrastructure --> observability --> apps
 ```
 
+Progress so far toward multi-node:
+
+- Longhorn is installed and healthy via Flux in `longhorn-system`
+- `local-path` is still the default StorageClass
+- Redis has already been migrated to a Longhorn-backed PVC
+- Crowdsec, Grafana, Prometheus, Loki, and Traefik TLS storage still use `local-path`
+- `bootstrap.sh` now installs Longhorn prerequisites (`open-iscsi`) for future nodes
+
 ### Component Overview
 
 | Layer          | Component             | Type        | Replicas | Storage         |
@@ -24,7 +32,7 @@ infrastructure --> observability --> apps
 | Apps           | lab-home              | Deployment  | 1        | -               |
 | Apps           | wordle-duel           | Deployment  | 1        | -               |
 | Apps           | wordle-duel-service   | Deployment  | 1        | -               |
-| Apps           | Redis                 | Deployment  | 1        | 1Gi PVC         |
+| Apps           | Redis                 | Deployment  | 1        | 1Gi Longhorn PVC |
 
 \* Alloy is a DaemonSet — currently 1 pod because there is only 1 node.
 
@@ -32,11 +40,14 @@ infrastructure --> observability --> apps
 
 Three architectural choices tie this cluster to a single node:
 
-**1. local-path storage**
+**1. Remaining local-path storage**
 
-All PVCs use the k3s default `local-path` provisioner with `ReadWriteOnce` access mode. Data lives
-on the node's local disk with no replication. If a pod gets rescheduled to a different node, it
-cannot follow its data.
+Most persistent workloads still use the k3s default `local-path` provisioner with `ReadWriteOnce`
+access mode. Data lives on the node's local disk with no replication. If a pod gets rescheduled to
+a different node, it cannot follow its data.
+
+Redis is the exception: it already runs on a Longhorn PVC. Longhorn is installed but not yet the
+default StorageClass, so the cluster is currently in a mixed-storage transitional state.
 
 **2. hostPath + hostPort networking**
 
@@ -93,29 +104,30 @@ advantage over 1.
 
 **Impact:** bootstrap.sh must be updated to support both init and join flows.
 
-### 2. Replace local-path with Longhorn
+### 2. Finish replacing local-path with Longhorn
 
 [Longhorn](https://longhorn.io/) is a distributed block storage system that integrates natively with
 k3s. It replicates volumes across nodes, so pods can be rescheduled freely.
 
-| What changes         | From          | To                          |
-|----------------------|---------------|-----------------------------|
-| Default StorageClass | local-path    | longhorn                    |
-| Volume replication   | None          | 2-3 replicas across nodes   |
-| PVC access mode      | ReadWriteOnce | ReadWriteOnce (still works) |
-| Volume scheduling    | Node-bound    | Any node with a replica     |
+| What changes         | From                | To                          |
+|----------------------|---------------------|-----------------------------|
+| Default StorageClass | local-path          | longhorn                    |
+| Volume replication   | None / single copy  | 2-3 replicas across nodes   |
+| PVC access mode      | ReadWriteOnce       | ReadWriteOnce (still works) |
+| Volume scheduling    | Node-bound          | Any node with a replica     |
 
-**Affected PVCs:**
+**PVC status:**
 
-- Prometheus (10Gi)
-- Grafana (2Gi)
-- Loki (10Gi)
-- Crowdsec LAPI data (1Gi) + config (100Mi)
-- Redis (1Gi)
-- Traefik acme.json (TLS certificates)
+- Done: Redis (1Gi)
+- Remaining: Prometheus (10Gi)
+- Remaining: Grafana (2Gi)
+- Remaining: Loki (10Gi)
+- Remaining: Crowdsec LAPI data (1Gi) + config (100Mi)
+- Remaining: Traefik acme.json (TLS certificates)
 
-Migration path: install Longhorn, set it as default StorageClass, then recreate PVCs (backup data
-first). Alternatively, use Longhorn's built-in backup/restore.
+Migration path: Longhorn is already installed. The remaining work is to migrate each PVC to
+Longhorn, then optionally switch the default StorageClass once the cluster is ready. Alternatively,
+use Longhorn's built-in backup/restore where preserving data matters.
 
 ### 3. Replace klipper with MetalLB
 
@@ -173,6 +185,9 @@ The current `bootstrap.sh` assumes a single fresh node. For multi-node:
 - Install Longhorn prerequisites (open-iscsi) on every node
 - Flux bootstrap only runs once (on the first server)
 
+Current status: `bootstrap.sh` already installs `open-iscsi` and enables `iscsid`, but it still
+needs the multi-node init/join flow changes.
+
 ### 6. TLS certificate sharing
 
 Traefik stores Let's Encrypt certificates in `acme.json` on a local-path PVC. With multiple Traefik
@@ -195,8 +210,8 @@ file entirely, and works naturally with any number of Traefik replicas.
 
 | Step | Task                                   | Risk   | Downtime                      |
 |------|----------------------------------------|--------|-------------------------------|
-| 1    | Install Longhorn alongside local-path  | Low    | None                          |
-| 2    | Migrate PVCs to Longhorn               | Medium | Per-service restart           |
+| 1    | Install Longhorn alongside local-path  | Done   | None                          |
+| 2    | Migrate remaining PVCs to Longhorn     | Medium | Per-service restart           |
 | 3    | Switch k3s to embedded etcd            | High   | Cluster restart               |
 | 4    | Join additional server nodes           | Low    | None                          |
 | 5    | Install MetalLB, reconfigure Traefik   | Medium | Brief (DNS + Traefik restart) |
@@ -204,8 +219,9 @@ file entirely, and works naturally with any number of Traefik replicas.
 | 7    | Convert Crowdsec Agent to DaemonSet    | Low    | None                          |
 | 8    | Update bootstrap.sh for multi-node     | Low    | None                          |
 
-Steps 1-2 can be done on the existing single node before adding more nodes. Step 3 is the point of
-no return — after converting to etcd, the cluster is ready to accept new members.
+Step 1 is complete and Redis is already migrated as part of step 2. The remaining PVC migrations
+can still be done on the existing single node before adding more nodes. Step 3 is the point of no
+return — after converting to etcd, the cluster is ready to accept new members.
 
 ---
 
