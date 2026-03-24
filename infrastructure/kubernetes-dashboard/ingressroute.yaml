@@ -28,4 +28,6 @@ spec:
           namespace: apps
         - name: dashboard-redirect
   tls:
-    certResolver: letsencrypt
+    store:
+      name: default
+      namespace: kube-system

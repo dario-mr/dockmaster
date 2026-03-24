@@ -28,4 +28,6 @@ spec:
         - name: default-headers
         - name: rate-limit-app
   tls:
-    certResolver: letsencrypt
+    store:
+      name: default
+      namespace: kube-system

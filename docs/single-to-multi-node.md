@@ -18,7 +18,7 @@ Progress so far toward multi-node:
 - Grafana is now targeted to a Longhorn-backed PVC
 - Loki is now targeted to a Longhorn-backed PVC
 - Prometheus is now targeted to a Longhorn-backed PVC
-- Traefik TLS storage still uses `local-path`, even when Longhorn is made the default
+- Traefik TLS is now backed by cert-manager and a shared default `TLSStore` certificate
 - The live cluster has already been converted from SQLite to embedded etcd
 - `bootstrap.sh` now always creates the first server with embedded etcd (`--cluster-init`)
 - `join-node.sh` now handles additional node joins as either a server or an agent
@@ -50,17 +50,7 @@ Progress so far toward multi-node:
 
 Two architectural choices still tie this cluster to a single node:
 
-**1. Remaining local-path storage**
-
-Traefik is the only remaining workload still using the k3s `local-path` provisioner with
-`ReadWriteOnce` access mode. Its data lives on the node's local disk with no replication. If the
-pod gets rescheduled to a different node, it cannot follow its data.
-
-Redis, Crowdsec LAPI, Grafana, Loki, and Prometheus are the current exceptions: they run on
-Longhorn PVCs. The cluster is still in a mixed-storage transitional state, but only because Traefik
-is intentionally pinned to `local-path` for now.
-
-**2. hostPath + hostPort networking**
+**1. hostPath + hostPort networking**
 
 Traefik binds directly to the node's ports 80 and 443 via `hostPort`, with `service.type: ClusterIP`
 (disabling the k3s klipper load balancer). This preserves real client source IPs, which Crowdsec
@@ -74,7 +64,7 @@ Alloy  -- reads -->  /var/log/traefik/access.log
 
 This only works when all three run on the same node.
 
-**3. Single server count**
+**2. Single server count**
 
 The cluster now runs on embedded etcd, so the datastore is ready for multiple server nodes. It is
 still effectively single-node only because there is currently just one server in the cluster.
@@ -136,13 +126,13 @@ k3s. It replicates volumes across nodes, so pods can be rescheduled freely.
 - Done: Grafana (2Gi)
 - Done: Loki (5Gi)
 - Done: Prometheus (10Gi)
-- Remaining: Traefik acme.json (TLS certificates)
+- Remaining: no app or observability PVCs; Traefik `acme.json` is replaced by cert-manager
 
 Migration path: Longhorn is already installed and all major app and observability PVCs are already
-on Longhorn. The default StorageClass can now be switched to Longhorn safely because Traefik is
-explicitly pinned to `local-path`. The remaining storage decision is whether to keep Traefik on
-local-path temporarily or replace `acme.json` with cert-manager entirely. Alternatively, use
-Longhorn's built-in backup/restore where preserving data matters.
+on Longhorn. The default StorageClass has already been switched to Longhorn, and Traefik TLS no
+longer depends on `acme.json`. The only likely cleanup left is deleting the old retained Traefik
+PVC from the live cluster if it still exists. Alternatively, use Longhorn's built-in backup/restore
+where preserving data matters.
 
 ### 3. Replace klipper with MetalLB
 
@@ -224,24 +214,14 @@ when you only want more room for workloads.
 
 ### 6. TLS certificate sharing
 
-Traefik stores Let's Encrypt certificates in `acme.json` on a local-path PVC. With multiple Traefik
-instances, each would try to issue its own certificate (hitting rate limits) or fail ACME
-challenges.
+Traefik now uses cert-manager-issued certificates from Kubernetes Secrets instead of storing Let's
+Encrypt state in `acme.json`.
 
-Options:
-
-- Use a Longhorn RWX (ReadWriteMany) volume shared across Traefik instances
-- Use cert-manager as a separate certificate issuer, storing certs in Kubernetes Secrets (Traefik
-  reads them natively) — this is the cleaner long-term solution
-- Use a single Traefik instance for TLS termination (defeats the purpose of multi-node)
-
-**Recommendation:** cert-manager. It's the standard Kubernetes approach, eliminates the acme.json
-file entirely, and works naturally with any number of Traefik replicas. cert-manager is now staged
-in the repo with both Let's Encrypt issuers and a shared Traefik `TLSStore` certificate. The
-remaining cutover is to switch IngressRoutes off `certResolver`, verify Traefik serves the
-cert-manager secret, and then remove the old ACME flags and PVC. One implementation detail: global
-entrypoint-level HTTP→HTTPS redirects in Traefik interfere with cert-manager HTTP-01 challenges, so
-that redirect now needs to be handled after ACME issuance instead of at the static entrypoint level.
+Current status: done. cert-manager is installed with both staging and production issuers, the shared
+Traefik `TLSStore` certificate is issued, and IngressRoutes no longer depend on Traefik's ACME
+resolver. One implementation detail remains important for the future: global entrypoint-level
+HTTP→HTTPS redirects in Traefik interfere with cert-manager HTTP-01 challenges, so that redirect
+cannot live at the static entrypoint level while HTTP-01 issuance is in use.
 
 ---
 
@@ -250,20 +230,17 @@ that redirect now needs to be handled after ACME issuance instead of at the stat
 | Step | Task                                   | Risk   | Downtime                      |
 |------|----------------------------------------|--------|-------------------------------|
 | 1    | Install Longhorn alongside local-path  | Done   | None                          |
-| 2    | Migrate remaining PVCs to Longhorn     | Medium | Per-service restart           |
+| 2    | Migrate remaining PVCs to Longhorn     | Done   | Per-service restart           |
 | 3    | Switch k3s to embedded etcd            | Done   | Cluster restart               |
 | 4    | Join additional server nodes           | Low    | None                          |
 | 5    | Install MetalLB, reconfigure Traefik   | Medium | Brief (DNS + Traefik restart) |
-| 6    | Install cert-manager, remove acme.json | Medium | Brief (cert reissue)          |
+| 6    | Install cert-manager, remove acme.json | Done   | Brief (cert reissue)          |
 | 7    | Convert Crowdsec Agent to DaemonSet    | Low    | None                          |
 | 8    | Update bootstrap/join scripts          | Done   | None                          |
 
-Step 1 is complete and Redis, Crowdsec LAPI, Grafana, Loki, plus Prometheus are already migrated as
-part of step 2. The only remaining local-path storage is Traefik's `acme.json`, which can stay on
-`local-path` temporarily because it is explicitly pinned there. Step 3 is also complete, so the
-cluster is now ready to accept additional server or agent nodes. Step 8 is complete as well, so
-new clusters can start directly on embedded etcd and additional nodes can be joined with the
-intended server and agent flows.
+Steps 1, 2, 3, 6, and 8 are complete. The cluster is now ready to accept additional server or
+agent nodes, and Traefik TLS no longer depends on node-local certificate storage. The remaining
+major work is networking for multi-node ingress, plus converting Crowdsec Agent to a DaemonSet.
 
 ---
 

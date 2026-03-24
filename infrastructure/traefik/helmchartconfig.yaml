@@ -6,9 +6,6 @@ metadata:
 spec:
   valuesContent: |-
     additionalArguments:
-      - "--certificatesresolvers.letsencrypt.acme.email=dario.mauri9@gmail.com"
-      - "--certificatesresolvers.letsencrypt.acme.storage=/data/acme.json"
-      - "--certificatesresolvers.letsencrypt.acme.tlschallenge=true"
       - "--accesslog=true"
       - "--accesslog.format=json"
       - "--accesslog.filepath=/var/log/traefik/access.log"
@@ -45,9 +42,6 @@ spec:
         hostPort: 443
     service:
       type: ClusterIP
-    persistence:
-      enabled: true
-      storageClass: local-path
     ingressRoute:
       dashboard:
         enabled: false
