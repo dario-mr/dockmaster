@@ -16,25 +16,26 @@ Progress so far toward multi-node:
 - Redis has already been migrated to a Longhorn-backed PVC
 - Crowdsec LAPI data and config are now targeted to Longhorn-backed PVCs
 - Grafana is now targeted to a Longhorn-backed PVC
-- Prometheus, Loki, and Traefik TLS storage still use `local-path`
+- Loki is now targeted to a Longhorn-backed PVC
+- Prometheus and Traefik TLS storage still use `local-path`
 - `bootstrap.sh` now installs Longhorn prerequisites (`open-iscsi`) for future nodes
 
 ### Component Overview
 
-| Layer          | Component             | Type        | Replicas | Storage         |
-|----------------|-----------------------|-------------|----------|-----------------|
-| Infrastructure | Traefik (k3s-bundled) | Deployment  | 1        | local-path PVC  |
+| Layer          | Component             | Type        | Replicas | Storage                  |
+|----------------|-----------------------|-------------|----------|--------------------------|
+| Infrastructure | Traefik (k3s-bundled) | Deployment  | 1        | local-path PVC           |
 | Infrastructure | Crowdsec LAPI         | Deployment  | 1        | 1Gi + 100Mi Longhorn PVC |
-| Infrastructure | Crowdsec Agent        | Deployment  | 1        | -               |
-| Infrastructure | Headlamp              | Deployment  | 1        | -               |
-| Observability  | Prometheus            | StatefulSet | 1        | 10Gi PVC        |
-| Observability  | Grafana               | Deployment  | 1        | 2Gi Longhorn PVC |
-| Observability  | Loki (SingleBinary)   | StatefulSet | 1        | 10Gi PVC        |
-| Observability  | Alloy                 | DaemonSet   | 1*       | -               |
-| Apps           | lab-home              | Deployment  | 1        | -               |
-| Apps           | wordle-duel           | Deployment  | 1        | -               |
-| Apps           | wordle-duel-service   | Deployment  | 1        | -               |
-| Apps           | Redis                 | Deployment  | 1        | 1Gi Longhorn PVC |
+| Infrastructure | Crowdsec Agent        | Deployment  | 1        | -                        |
+| Infrastructure | Headlamp              | Deployment  | 1        | -                        |
+| Observability  | Prometheus            | StatefulSet | 1        | 10Gi PVC                 |
+| Observability  | Grafana               | Deployment  | 1        | 2Gi Longhorn PVC         |
+| Observability  | Loki (SingleBinary)   | StatefulSet | 1        | 10Gi Longhorn PVC        |
+| Observability  | Alloy                 | DaemonSet   | 1*       | -                        |
+| Apps           | lab-home              | Deployment  | 1        | -                        |
+| Apps           | wordle-duel           | Deployment  | 1        | -                        |
+| Apps           | wordle-duel-service   | Deployment  | 1        | -                        |
+| Apps           | Redis                 | Deployment  | 1        | 1Gi Longhorn PVC         |
 
 \* Alloy is a DaemonSet — currently 1 pod because there is only 1 node.
 
@@ -48,9 +49,9 @@ Most persistent workloads still use the k3s default `local-path` provisioner wit
 access mode. Data lives on the node's local disk with no replication. If a pod gets rescheduled to
 a different node, it cannot follow its data.
 
-Redis, Crowdsec LAPI, and Grafana are the current exceptions: they run on Longhorn PVCs. Longhorn
-is installed but not yet the default StorageClass, so the cluster is currently in a mixed-storage
-transitional state.
+Redis, Crowdsec LAPI, Grafana, and Loki are the current exceptions: they run on Longhorn PVCs.
+Longhorn is installed but not yet the default StorageClass, so the cluster is currently in a
+mixed-storage transitional state.
 
 **2. hostPath + hostPort networking**
 
@@ -112,20 +113,20 @@ advantage over 1.
 [Longhorn](https://longhorn.io/) is a distributed block storage system that integrates natively with
 k3s. It replicates volumes across nodes, so pods can be rescheduled freely.
 
-| What changes         | From                | To                          |
-|----------------------|---------------------|-----------------------------|
-| Default StorageClass | local-path          | longhorn                    |
-| Volume replication   | None / single copy  | 2-3 replicas across nodes   |
-| PVC access mode      | ReadWriteOnce       | ReadWriteOnce (still works) |
-| Volume scheduling    | Node-bound          | Any node with a replica     |
+| What changes         | From               | To                          |
+|----------------------|--------------------|-----------------------------|
+| Default StorageClass | local-path         | longhorn                    |
+| Volume replication   | None / single copy | 2-3 replicas across nodes   |
+| PVC access mode      | ReadWriteOnce      | ReadWriteOnce (still works) |
+| Volume scheduling    | Node-bound         | Any node with a replica     |
 
 **PVC status:**
 
 - Done: Redis (1Gi)
 - Done: Crowdsec LAPI data (1Gi) + config (100Mi)
 - Done: Grafana (2Gi)
+- Done: Loki (10Gi)
 - Remaining: Prometheus (10Gi)
-- Remaining: Loki (10Gi)
 - Remaining: Traefik acme.json (TLS certificates)
 
 Migration path: Longhorn is already installed. The remaining work is to migrate each PVC to
@@ -222,10 +223,10 @@ file entirely, and works naturally with any number of Traefik replicas.
 | 7    | Convert Crowdsec Agent to DaemonSet    | Low    | None                          |
 | 8    | Update bootstrap.sh for multi-node     | Low    | None                          |
 
-Step 1 is complete and Redis, Crowdsec LAPI, plus Grafana are already migrated as part of step 2.
-The remaining PVC migrations can still be done on the existing single node before adding more
-nodes. Step 3 is the point of no return — after converting to etcd, the cluster is ready to accept
-new members.
+Step 1 is complete and Redis, Crowdsec LAPI, Grafana, plus Loki are already migrated as part of
+step 2. The remaining PVC migrations can still be done on the existing single node before adding
+more nodes. Step 3 is the point of no return — after converting to etcd, the cluster is ready to
+accept new members.
 
 ---
 
