@@ -4,7 +4,7 @@ trap 'echo "[ERROR] Command failed at line ${LINENO}: ${BASH_COMMAND}"' ERR
 
 echo "=== Dockmaster Bootstrap ==="
 
-REQUIRED_APT_PACKAGES=(curl git ufw)
+REQUIRED_APT_PACKAGES=(curl git open-iscsi ufw)
 
 log_step() {
   echo "[..] $1"
@@ -83,6 +83,10 @@ require_command sed
 require_command systemctl
 require_command curl
 require_command git
+
+# Longhorn requires the host iSCSI daemon on every node.
+systemctl enable --now iscsid >/dev/null 2>&1 || true
+log_ok "iscsid service enabled"
 
 # Configure journald retention
 mkdir -p /etc/systemd/journald.conf.d
