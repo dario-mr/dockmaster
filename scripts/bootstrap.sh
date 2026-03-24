@@ -99,6 +99,16 @@ CONF
 systemctl restart systemd-journald
 echo "[OK] journald retention configured"
 
+# Raise inotify limits to avoid watcher exhaustion in Crowdsec and storage sidecars.
+mkdir -p /etc/sysctl.d
+cat > /etc/sysctl.d/99-dockmaster-inotify.conf <<'CONF'
+fs.inotify.max_user_instances = 1024
+fs.inotify.max_user_watches = 262144
+fs.inotify.max_queued_events = 32768
+CONF
+sysctl --system >/dev/null
+echo "[OK] inotify sysctl limits configured"
+
 # Install and configure UFW
 for rule in OpenSSH 80/tcp 443/tcp; do
   allow_ufw_rule_if_missing "$rule"
