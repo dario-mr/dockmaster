@@ -239,7 +239,9 @@ Options:
 file entirely, and works naturally with any number of Traefik replicas. cert-manager is now staged
 in the repo with both Let's Encrypt issuers and a shared Traefik `TLSStore` certificate. The
 remaining cutover is to switch IngressRoutes off `certResolver`, verify Traefik serves the
-cert-manager secret, and then remove the old ACME flags and PVC.
+cert-manager secret, and then remove the old ACME flags and PVC. One implementation detail: global
+entrypoint-level HTTP→HTTPS redirects in Traefik interfere with cert-manager HTTP-01 challenges, so
+that redirect now needs to be handled after ACME issuance instead of at the static entrypoint level.
 
 ---
 
