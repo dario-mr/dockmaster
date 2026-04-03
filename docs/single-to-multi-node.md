@@ -81,28 +81,48 @@ already on Longhorn. The default StorageClass has also been switched to Longhorn
 future-facing task is not PVC migration anymore, but increasing Longhorn replica count once
 multiple nodes exist.
 
-### Replace klipper with MetalLB
+### Choose a multi-node ingress strategy
 
 klipper (k3s built-in LB) uses svclb DaemonSet pods that SNAT traffic, hiding real client IPs. The
-current workaround (hostPort + ClusterIP) only works on a single node.
+current workaround (hostPort + ClusterIP) preserves source IPs, but only works cleanly on a single
+node.
 
-[MetalLB](https://metallb.universe.tf/) in L2 mode provides a proper LoadBalancer service that
-preserves source IPs via `externalTrafficPolicy: Local`.
+There is no provider-neutral default answer here. The right choice depends on how much you want to
+optimize for portability, simplicity, and independence from the underlying network.
 
-| What changes           | From                       | To                              |
-|------------------------|----------------------------|---------------------------------|
-| Traefik service type   | ClusterIP + hostPort       | LoadBalancer                    |
-| Load balancer          | None (direct node binding) | MetalLB L2                      |
-| Client IP preservation | hostPort (inherent)        | externalTrafficPolicy: Local    |
-| Port binding           | Single node ports 80/443   | Virtual IP, any node can answer |
+**Option A: Keep the current hostPort setup until more nodes actually exist**
 
-**Requires:**
+- Pros: simplest, no new components, no provider coupling, no extra moving parts
+- Cons: no multi-node ingress yet; traffic still terminates on a single node
+- Good fit when: the cluster still has only one node and you want to avoid premature architecture
 
-- MetalLB HelmRelease + IPAddressPool
-- Remove `hostPort` from Traefik HelmChartConfig
-- Change Traefik service type to LoadBalancer
-- Point DNS at the MetalLB VIP
-- Disable klipper: `--disable=servicelb` in k3s server flags
+**Option B: MetalLB in L2 mode**
+
+- Pros: Kubernetes-native, simple when the network supports it, preserves client IPs with
+  `externalTrafficPolicy: Local`
+- Cons: couples the cluster to L2/LAN topology; typically expects nodes to share a broadcast domain
+  and the VIP to be routable on that network
+- Good fit when: the cluster runs on bare metal, a homelab LAN, or another environment where ARP/NDP
+  failover is actually supported
+- Not a drop-in fit here: on the current Contabo VPS setup there is only one public node IP, and
+  MetalLB L2 would need a provider-routable additional or floating IP to advertise as the VIP
+
+**Option C: Provider-managed additional/floating IP**
+
+- Pros: works with VPS providers that do not behave like a shared LAN; gives a stable public IP
+- Cons: ties failover to provider-specific networking and often provider APIs
+- Good fit when: you accept provider coupling in exchange for a practical HA ingress path
+
+**Option D: External reverse proxy or load balancer in front of the cluster**
+
+- Pros: provider-agnostic from the cluster's point of view; can give one stable public entrypoint
+- Cons: adds another component, more TLS/header/real-IP configuration, and more operational
+  complexity
+- Good fit when: you explicitly want to decouple public ingress from the Kubernetes network model
+
+**Current recommendation:** defer this decision until additional nodes actually exist. At the
+moment, keeping the current `hostPort` model is the lowest-complexity choice, and MetalLB should
+not be treated as the default next step on Contabo.
 
 ### Centralize or distribute Traefik access logs
 
@@ -134,17 +154,18 @@ nodes yet because the cluster still has only one node and still depends on the l
 
 ## Migration Priority Order
 
-| Step | Task                                   | Risk   | Downtime                      |
-|------|----------------------------------------|--------|-------------------------------|
-| 1    | Install Longhorn alongside local-path  | Done   | None                          |
-| 2    | Migrate remaining PVCs to Longhorn     | Done   | Per-service restart           |
-| 3    | Switch k3s to embedded etcd            | Done   | Cluster restart               |
-| 4    | Join additional server nodes           | Low    | None                          |
-| 5    | Install MetalLB, reconfigure Traefik   | Medium | Brief (DNS + Traefik restart) |
-| 6    | Install cert-manager, remove acme.json | Done   | Brief (cert reissue)          |
-| 7    | Convert Crowdsec Agent to DaemonSet    | Done   | None                          |
-| 8    | Update bootstrap/join scripts          | Done   | None                          |
+| Step | Task                                   | Risk    | Downtime                  |
+|------|----------------------------------------|---------|---------------------------|
+| 1    | Install Longhorn alongside local-path  | Done    | None                      |
+| 2    | Migrate remaining PVCs to Longhorn     | Done    | Per-service restart       |
+| 3    | Switch k3s to embedded etcd            | Done    | Cluster restart           |
+| 4    | Join additional server nodes           | Low     | None                      |
+| 5    | Choose multi-node ingress strategy     | Blocked | Provider/network decision |
+| 6    | Install cert-manager, remove acme.json | Done    | Brief (cert reissue)      |
+| 7    | Convert Crowdsec Agent to DaemonSet    | Done    | None                      |
+| 8    | Update bootstrap/join scripts          | Done    | None                      |
 
 Steps 1, 2, 3, 6, 7, and 8 are complete. The cluster is now ready to accept additional server or
 agent nodes, and Traefik TLS no longer depends on node-local certificate storage. The remaining
-major work is networking for multi-node ingress.
+major work is deciding how multi-node ingress should work, which is currently blocked on the
+provider/network tradeoff rather than on Kubernetes manifests alone.
