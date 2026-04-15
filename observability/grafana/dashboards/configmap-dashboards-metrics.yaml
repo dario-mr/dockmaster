@@ -316,7 +316,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "sum(rate(http_server_requests_seconds_count{application=\"$app\", status=~\"1..|2..|3..\"}[5m]))",
+              "expr": "sum(rate(http_server_requests_seconds_count{application=\"$app\", status=~\"1..|2..|3..\"}[$__rate_interval]))",
               "legendFormat": "OK",
               "range": true,
               "refId": "OK"
@@ -327,7 +327,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "sum(rate(http_server_requests_seconds_count{application=\"$app\", status=~\"4..\"}[5m]))",
+              "expr": "sum(rate(http_server_requests_seconds_count{application=\"$app\", status=~\"4..\"}[$__rate_interval]))",
               "hide": false,
               "legendFormat": "Client errors",
               "range": true,
@@ -339,7 +339,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "sum(rate(http_server_requests_seconds_count{application=\"$app\", status=~\"5..\"}[5m]))\n",
+              "expr": "sum(rate(http_server_requests_seconds_count{application=\"$app\", status=~\"5..\"}[$__rate_interval]))\n",
               "hide": false,
               "legendFormat": "Server errors",
               "range": true,
@@ -444,7 +444,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "sum by (uri, status, method) (\n  rate(http_server_requests_seconds_count{application=\"$app\", uri!~\"UNKNOWN\"}[1m])\n)",
+              "expr": "sum by (uri, status, method) (\n  rate(http_server_requests_seconds_count{application=\"$app\", uri!~\"UNKNOWN\"}[$__rate_interval])\n)",
               "instant": false,
               "legendFormat": "{{method}} {{uri}} {{status}}",
               "range": true,
@@ -546,7 +546,7 @@ data:
               },
               "editorMode": "code",
               "exemplar": false,
-              "expr": "sum(rate(http_server_requests_seconds_sum{application=\"$app\"}[5m])) \n/ \nsum(rate(http_server_requests_seconds_count{application=\"$app\"}[5m]))",
+              "expr": "sum(rate(http_server_requests_seconds_sum{application=\"$app\"}[$__rate_interval])) \n/ \nsum(rate(http_server_requests_seconds_count{application=\"$app\"}[$__rate_interval]))",
               "format": "time_series",
               "instant": false,
               "legendFormat": "latency",
@@ -653,7 +653,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "(\n  sum by (method, uri) (rate(http_server_requests_seconds_sum{application=\"$app\",status=~\"2..|3..|4..|5..\"}[5m]))\n  /\n  sum by (method, uri) (rate(http_server_requests_seconds_count{application=\"$app\",status=~\"2..|3..|4..|5..\"}[5m]))\n)\nunless\n(sum by (method, uri) (rate(http_server_requests_seconds_count{application=\"$app\",status=~\"2..|3..|4..|5..\"}[5m])) == 0)",
+              "expr": "(\n  sum by (method, uri) (rate(http_server_requests_seconds_sum{application=\"$app\",status=~\"2..|3..|4..|5..\"}[$__rate_interval]))\n  /\n  sum by (method, uri) (rate(http_server_requests_seconds_count{application=\"$app\",status=~\"2..|3..|4..|5..\"}[$__rate_interval]))\n)\nunless\n(sum by (method, uri) (rate(http_server_requests_seconds_count{application=\"$app\",status=~\"2..|3..|4..|5..\"}[$__rate_interval])) == 0)",
               "instant": false,
               "legendFormat": "{{method}} {{uri}}",
               "range": true,
@@ -752,7 +752,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "sum by (uri) (rate(http_server_requests_seconds_count{application=\"$app\",status=~\"5..\"}[5m]))",
+              "expr": "sum by (uri) (rate(http_server_requests_seconds_count{application=\"$app\",status=~\"5..\"}[$__rate_interval]))",
               "instant": false,
               "legendFormat": "__auto",
               "range": true,
@@ -853,7 +853,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "100 * sum(rate(http_server_requests_seconds_count{application=\"$app\",status=~\"5..\"}[5m])) / sum(rate(http_server_requests_seconds_count{application=\"$app\"}[5m]))",
+              "expr": "100 * sum(rate(http_server_requests_seconds_count{application=\"$app\",status=~\"5..\"}[$__rate_interval])) / sum(rate(http_server_requests_seconds_count{application=\"$app\"}[$__rate_interval]))",
               "legendFormat": "error rate",
               "range": true,
               "refId": "A"
@@ -1510,7 +1510,7 @@ data:
                     "uid": "prometheus"
                   },
                   "editorMode": "code",
-                  "expr": "rate(hikaricp_connections_acquire_seconds_sum{application=\"$app\",pool=\"$pool\"}[5m])\n/\nrate(hikaricp_connections_acquire_seconds_count{application=\"$app\",pool=\"$pool\"}[5m])",
+                  "expr": "rate(hikaricp_connections_acquire_seconds_sum{application=\"$app\",pool=\"$pool\"}[$__rate_interval])\n/\nrate(hikaricp_connections_acquire_seconds_count{application=\"$app\",pool=\"$pool\"}[$__rate_interval])",
                   "instant": false,
                   "legendFormat": "acquire time",
                   "range": true,
@@ -1610,7 +1610,7 @@ data:
                     "uid": "prometheus"
                   },
                   "editorMode": "code",
-                  "expr": "rate(hikaricp_connections_usage_seconds_sum{application=\"$app\",pool=\"$pool\"}[5m])\n/\nrate(hikaricp_connections_usage_seconds_count{application=\"$app\",pool=\"$pool\"}[5m])",
+                  "expr": "rate(hikaricp_connections_usage_seconds_sum{application=\"$app\",pool=\"$pool\"}[$__rate_interval])\n/\nrate(hikaricp_connections_usage_seconds_count{application=\"$app\",pool=\"$pool\"}[$__rate_interval])",
                   "instant": false,
                   "legendFormat": "duration",
                   "range": true,
@@ -1711,7 +1711,7 @@ data:
                     "uid": "prometheus"
                   },
                   "editorMode": "code",
-                  "expr": "rate(hikaricp_connections_timeout_total{application=\"$app\",pool=\"$pool\"}[5m])",
+                  "expr": "rate(hikaricp_connections_timeout_total{application=\"$app\",pool=\"$pool\"}[$__rate_interval])",
                   "instant": false,
                   "legendFormat": "timeouts /s",
                   "range": true,
@@ -2081,7 +2081,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "sum by (repository, method) (rate(spring_data_repository_invocations_seconds_sum{application=\"$app\",state=\"SUCCESS\"}[5m]))\n/\nsum by (repository, method) (rate(spring_data_repository_invocations_seconds_count{application=\"$app\",state=\"SUCCESS\"}[5m]))\nunless\nsum by (repository, method) (\n  rate(spring_data_repository_invocations_seconds_count{application=\"$app\",state=\"SUCCESS\"}[5m])\n) == 0",
+              "expr": "sum by (repository, method) (rate(spring_data_repository_invocations_seconds_sum{application=\"$app\",state=\"SUCCESS\"}[$__rate_interval]))\n/\nsum by (repository, method) (rate(spring_data_repository_invocations_seconds_count{application=\"$app\",state=\"SUCCESS\"}[$__rate_interval]))\nunless\nsum by (repository, method) (\n  rate(spring_data_repository_invocations_seconds_count{application=\"$app\",state=\"SUCCESS\"}[$__rate_interval])\n) == 0",
               "instant": false,
               "legendFormat": "{{repository}}.{{method}}",
               "range": true,
@@ -2183,7 +2183,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "(\n  max_over_time(\n    spring_data_repository_invocations_seconds_max{application=\"$app\",state=\"SUCCESS\"}[5m]\n  )\n)\nunless\n(\n  sum by (repository, method) (\n    rate(spring_data_repository_invocations_seconds_count{application=\"$app\",state=\"SUCCESS\"}[5m])\n  ) == 0\n)",
+              "expr": "(\n  max_over_time(\n    spring_data_repository_invocations_seconds_max{application=\"$app\",state=\"SUCCESS\"}[5m]\n  )\n)\nunless\n(\n  sum by (repository, method) (\n    rate(spring_data_repository_invocations_seconds_count{application=\"$app\",state=\"SUCCESS\"}[$__rate_interval])\n  ) == 0\n)",
               "instant": false,
               "legendFormat": "{{repository}}.{{method}}",
               "range": true,
@@ -2286,7 +2286,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "sum by (repository) (rate(spring_data_repository_invocations_seconds_count{application=\"$app\"}[5m]))",
+              "expr": "sum by (repository) (rate(spring_data_repository_invocations_seconds_count{application=\"$app\"}[$__rate_interval]))",
               "instant": false,
               "legendFormat": "__auto",
               "range": true,
@@ -2406,7 +2406,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "(\n  sum by (cache) (rate(cache_gets_total{application=\"$app\", result=\"hit\"}[5m]))\n  /\n  sum by (cache) (rate(cache_gets_total{application=\"$app\"}[5m]))\n)\nunless\n(sum by (cache) (rate(cache_gets_total{application=\"$app\"}[5m])) == 0)",
+              "expr": "(\n  sum by (cache) (rate(cache_gets_total{application=\"$app\", result=\"hit\"}[$__rate_interval]))\n  /\n  sum by (cache) (rate(cache_gets_total{application=\"$app\"}[$__rate_interval]))\n)\nunless\n(sum by (cache) (rate(cache_gets_total{application=\"$app\"}[$__rate_interval])) == 0)",
               "legendFormat": "{{cache}}",
               "range": true,
               "refId": "A"
@@ -2508,7 +2508,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "sum by (cache_manager, cache) (\n  rate(cache_gets_total{application=\"$app\", result=\"hit\"}[5m])\n)",
+              "expr": "sum by (cache_manager, cache) (\n  rate(cache_gets_total{application=\"$app\", result=\"hit\"}[$__rate_interval])\n)",
               "legendFormat": "{{cache}}",
               "range": true,
               "refId": "A"
@@ -2610,7 +2610,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "sum by (cache_manager, cache) (\n  rate(cache_gets_total{application=\"$app\", result=\"miss\"}[5m])\n)",
+              "expr": "sum by (cache_manager, cache) (\n  rate(cache_gets_total{application=\"$app\", result=\"miss\"}[$__rate_interval])\n)",
               "legendFormat": "{{cache}}",
               "range": true,
               "refId": "A"
@@ -2791,7 +2791,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "sum by (command) (\n  rate(lettuce_command_firstresponse_seconds_sum{command!~\"CLIENT|HELLO\"}[5m])\n)\n/\nsum by (command) (\n  rate(lettuce_command_firstresponse_seconds_count{command!~\"CLIENT|HELLO\"}[5m])\n)",
+              "expr": "sum by (command) (\n  rate(lettuce_command_firstresponse_seconds_sum{command!~\"CLIENT|HELLO\"}[$__rate_interval])\n)\n/\nsum by (command) (\n  rate(lettuce_command_firstresponse_seconds_count{command!~\"CLIENT|HELLO\"}[$__rate_interval])\n)",
               "legendFormat": "__auto",
               "range": true,
               "refId": "A"
@@ -2893,7 +2893,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "sum by (command) (rate(lettuce_command_firstresponse_seconds_count[5m]))\nunless\nsum by (command) (rate(lettuce_command_firstresponse_seconds_count[5m])) == 0",
+              "expr": "sum by (command) (rate(lettuce_command_firstresponse_seconds_count[$__rate_interval]))\nunless\nsum by (command) (rate(lettuce_command_firstresponse_seconds_count[$__rate_interval])) == 0",
               "legendFormat": "__auto",
               "range": true,
               "refId": "A"
@@ -3015,7 +3015,7 @@ data:
                     "uid": "prometheus"
                   },
                   "editorMode": "code",
-                  "expr": "rate(tomcat_sessions_created_sessions_total{application=\"$app\"}[5m])",
+                  "expr": "rate(tomcat_sessions_created_sessions_total{application=\"$app\"}[$__rate_interval])",
                   "hide": false,
                   "instant": false,
                   "legendFormat": "created",
@@ -3028,7 +3028,7 @@ data:
                     "uid": "prometheus"
                   },
                   "editorMode": "code",
-                  "expr": "rate(tomcat_sessions_expired_sessions_total{application=\"$app\"}[5m])",
+                  "expr": "rate(tomcat_sessions_expired_sessions_total{application=\"$app\"}[$__rate_interval])",
                   "hide": false,
                   "instant": false,
                   "legendFormat": "expired",
@@ -3223,7 +3223,7 @@ data:
                     "uid": "prometheus"
                   },
                   "editorMode": "code",
-                  "expr": "sum by (level) (rate(logback_events_total{application=\"$app\"}[1m]))",
+                  "expr": "sum by (level) (rate(logback_events_total{application=\"$app\"}[$__rate_interval]))",
                   "instant": false,
                   "legendFormat": "__auto",
                   "range": true,
@@ -3431,7 +3431,7 @@ data:
                     "uid": "prometheus"
                   },
                   "editorMode": "code",
-                  "expr": "rate(jvm_gc_memory_allocated_bytes_total{application=\"$app\"}[5m])",
+                  "expr": "rate(jvm_gc_memory_allocated_bytes_total{application=\"$app\"}[$__rate_interval])",
                   "instant": false,
                   "legendFormat": "allocation rate",
                   "range": true,
@@ -3986,7 +3986,7 @@ data:
                     "uid": "prometheus"
                   },
                   "editorMode": "code",
-                  "expr": "sum by (routeId) (rate(spring_cloud_gateway_requests_seconds_count{application=\"$app\"}[1m]))",
+                  "expr": "sum by (routeId) (rate(spring_cloud_gateway_requests_seconds_count{application=\"$app\"}[$__rate_interval]))",
                   "instant": false,
                   "legendFormat": "__auto",
                   "range": true,
@@ -4469,7 +4469,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "rate(process_cpu_seconds_total{job=\"$job\",instance=\"$instance\"}[5m]) * 100",
+              "expr": "rate(process_cpu_seconds_total{job=\"$job\",instance=\"$instance\"}[$__rate_interval]) * 100",
               "legendFormat": "cpu",
               "range": true,
               "refId": "A"
@@ -4848,7 +4848,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "rate(scrape_samples_scraped{job=\"$job\",instance=\"$instance\"}[5m])",
+              "expr": "rate(scrape_samples_scraped{job=\"$job\",instance=\"$instance\"}[$__rate_interval])",
               "legendFormat": "{{job}}",
               "range": true,
               "refId": "A"
@@ -4944,7 +4944,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "rate(scrape_samples_post_metric_relabeling{job=\"$job\",instance=\"$instance\"}[5m])",
+              "expr": "rate(scrape_samples_post_metric_relabeling{job=\"$job\",instance=\"$instance\"}[$__rate_interval])",
               "legendFormat": "post_relabel",
               "range": true,
               "refId": "A"
@@ -5148,7 +5148,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "rate(prometheus_tsdb_head_series[5m])",
+              "expr": "rate(prometheus_tsdb_head_series[$__rate_interval])",
               "legendFormat": "series/s",
               "range": true,
               "refId": "A"
@@ -5344,7 +5344,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "sum(rate(container_cpu_usage_seconds_total{name=~\"$container\",name=~\".+\"}[5m])) by (name) * 100",
+              "expr": "sum(rate(container_cpu_usage_seconds_total{name=~\"$container\",name=~\".+\"}[$__rate_interval])) by (name) * 100",
               "legendFormat": "{{namespace}}/{{container}}",
               "range": true,
               "refId": "A"
@@ -5558,7 +5558,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "sum(rate(container_network_receive_bytes_total{name=~\"$container\",name=~\".+\"}[5m])) by (name)",
+              "expr": "sum(rate(container_network_receive_bytes_total{name=~\"$container\",name=~\".+\"}[$__rate_interval])) by (name)",
               "legendFormat": "{{namespace}}/{{container}}",
               "range": true,
               "refId": "A"
@@ -5652,7 +5652,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "sum(rate(container_network_transmit_bytes_total{name=~\"$container\",name=~\".+\"}[5m])) by (name)",
+              "expr": "sum(rate(container_network_transmit_bytes_total{name=~\"$container\",name=~\".+\"}[$__rate_interval])) by (name)",
               "legendFormat": "{{namespace}}/{{container}}",
               "range": true,
               "refId": "A"
@@ -5757,7 +5757,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "rate(container_fs_reads_bytes_total{name=~\"$container\"}[5m])",
+              "expr": "rate(container_fs_reads_bytes_total{name=~\"$container\"}[$__rate_interval])",
               "legendFormat": "{{namespace}}/{{container}}",
               "range": true,
               "refId": "A"
@@ -5849,7 +5849,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "rate(container_fs_writes_bytes_total{name=~\"$container\"}[5m])",
+              "expr": "rate(container_fs_writes_bytes_total{name=~\"$container\"}[$__rate_interval])",
               "legendFormat": "{{namespace}}/{{container}}",
               "range": true,
               "refId": "B"
