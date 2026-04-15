@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: wordle-duel-service
-          image: dariomr8/wordle-duel-service:0.15.0 # {"$imagepolicy": "flux-system:wordle-duel-service"}
+          image: dariomr8/wordle-duel-service:0.15.1 # {"$imagepolicy": "flux-system:wordle-duel-service"}
           ports:
             - containerPort: 8088
           envFrom:
