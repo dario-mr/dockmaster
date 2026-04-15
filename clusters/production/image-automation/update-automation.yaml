@@ -1,0 +1,22 @@
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImageUpdateAutomation
+metadata:
+  name: apps
+  namespace: flux-system
+spec:
+  git:
+    checkout:
+      ref:
+        branch: main
+    commit:
+      author:
+        email: fluxcdbot@users.noreply.github.com
+        name: Flux
+      messageTemplate: "chore(images): update app images"
+  interval: 5m0s
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  update:
+    path: ./apps
+    strategy: Setters

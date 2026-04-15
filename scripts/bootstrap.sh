@@ -303,6 +303,8 @@ flux bootstrap github \
   --repository=dockmaster \
   --branch=main \
   --path=clusters/production \
+  --components-extra=image-reflector-controller,image-automation-controller \
+  --read-write-key \
   --personal
 kubectl wait --for=condition=Available deployment --all -n flux-system --timeout=180s
 flux check --pre=false
