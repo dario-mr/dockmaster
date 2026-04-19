@@ -127,6 +127,8 @@ new stable semver tag is published to Docker Hub for the tracked first-party ima
    cp secrets/geoipupdate-secret.template.yaml secrets/geoipupdate-secret.yaml
    # Edit secrets with real values
    ```
+   For `wordle-duel-service`, set `WORDLE_JWT_PRIVATE_KEY_PEM` and `WORDLE_JWT_PUBLIC_KEY_PEM`
+   to the PEM contents themselves.
 
 3. **Set your domain:**
    Update `DOMAIN` in [kustomization.yaml](clusters/production/kustomization.yaml) so it matches the
