@@ -14,3 +14,6 @@ resources:
   - wordle-duel/deployment.yaml
   - wordle-duel/service.yaml
   - wordle-duel/ingressroute.yaml
+  - function-plotter/deployment.yaml
+  - function-plotter/service.yaml
+  - function-plotter/ingressroute.yaml

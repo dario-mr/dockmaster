@@ -69,3 +69,27 @@ spec:
   policy:
     semver:
       range: ">=0.0.0"
+---
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImageRepository
+metadata:
+  name: function-plotter
+  namespace: flux-system
+spec:
+  image: dariomr8/function-plotter
+  interval: 5m0s
+---
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImagePolicy
+metadata:
+  name: function-plotter
+  namespace: flux-system
+spec:
+  filterTags:
+    extract: ""
+    pattern: ^[0-9]+\.[0-9]+\.[0-9]+$
+  imageRepositoryRef:
+    name: function-plotter
+  policy:
+    semver:
+      range: ">=0.0.0"

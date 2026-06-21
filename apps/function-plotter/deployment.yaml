@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: function-plotter
+  namespace: apps
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: function-plotter
+  template:
+    metadata:
+      labels:
+        app: function-plotter
+    spec:
+      containers:
+        - name: function-plotter
+          image: dariomr8/function-plotter:0.0.1 # {"$imagepolicy": "flux-system:function-plotter"}
+          ports:
+            - containerPort: 80
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3

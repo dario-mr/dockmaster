@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: function-plotter
+  namespace: apps
+spec:
+  selector:
+    app: function-plotter
+  ports:
+    - port: 80
+      targetPort: 80
