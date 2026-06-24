@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: function-plotter
-          image: dariomr8/function-plotter:0.0.3 # {"$imagepolicy": "flux-system:function-plotter"}
+          image: dariomr8/function-plotter:0.0.4 # {"$imagepolicy": "flux-system:function-plotter"}
           ports:
             - containerPort: 80
           livenessProbe:
