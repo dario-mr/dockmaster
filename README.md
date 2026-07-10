@@ -90,7 +90,7 @@ docs/                      Documentation (secrets inventory, Crowdsec operations
 | [Loki](https://grafana.com/oss/loki/)                                        | Log aggregation (SingleBinary, TSDB, 30d retention)    | 6.53.0        |
 | [Alloy](https://grafana.com/oss/alloy/)                                      | Log collection (pod logs + Traefik access logs)        | 0.12.6        |
 | [Crowdsec](https://www.crowdsec.net/)                                        | Intrusion detection + Traefik bouncer                  | 0.22.1        |
-| [Headlamp](https://headlamp.dev/)                                            | Cluster web UI (token auth)                            | 0.40.0        |
+| [Headlamp](https://headlamp.dev/)                                            | Cluster web UI (token auth)                            | 0.43.0        |
 
 ## Applications
 
