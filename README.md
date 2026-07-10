@@ -213,3 +213,9 @@ flux get helmreleases -n observability
 kubectl logs -n observability -l app.kubernetes.io/name=alloy -c alloy --tail=20
 kubectl logs -n observability -l app.kubernetes.io/name=grafana -c grafana --tail=20
 ```
+
+Check outdated Helm-managed components:
+
+```bash
+bash scripts/check-outdated-apps.sh
+```
