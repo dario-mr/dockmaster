@@ -242,8 +242,8 @@ helm repo update >/dev/null
 outdated_count=0
 error_count=0
 
-printf "%-24s %-24s %-12s %-12s %s\n" "NAMESPACE" "RELEASE" "CURRENT" "LATEST" "CHART"
-printf "%-24s %-24s %-12s %-12s %s\n" "---------" "-------" "-------" "------" "-----"
+printf "%-24s %-24s %-28s %-12s %-12s\n" "NAMESPACE" "RELEASE" "CHART" "CURRENT" "LATEST"
+printf "%-24s %-24s %-28s %-12s %-12s\n" "---------" "-------" "-----" "-------" "------"
 
 while IFS='|' read -r file release_namespace release_name chart_name chart_version source_name source_namespace; do
   repo_key="${source_namespace}/${source_name}"
@@ -268,8 +268,8 @@ while IFS='|' read -r file release_namespace release_name chart_name chart_versi
   fi
 
   if version_gt "${latest_version}" "${chart_version}"; then
-    printf "%-24s %-24s %-12s %-12s %s\n" \
-      "${release_namespace}" "${release_name}" "${chart_version}" "${latest_version}" "${chart_name}"
+    printf "%-24s %-24s %-28s %-12s %-12s\n" \
+      "${release_namespace}" "${release_name}" "${chart_name}" "${chart_version}" "${latest_version}"
     outdated_count=$((outdated_count + 1))
   fi
 done < <(extract_helm_releases "${helm_release_files[@]}")
