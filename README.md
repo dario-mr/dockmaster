@@ -94,14 +94,14 @@ docs/                      Documentation (secrets inventory, Crowdsec operations
 
 ## Applications
 
-| App                 | Description              | URL                                     |
-|---------------------|--------------------------|-----------------------------------------|
+| App                 | Description              | URL                                      |
+|---------------------|--------------------------|------------------------------------------|
 | function-plotter    | Function plotting app    | `https://dariolab.com/function-plotter/` |
-| lab-home            | Static landing page      | `https://dariolab.com/`                 |
-| wordle-duel         | Wordle game frontend     | `https://dariolab.com/wordle-duel/`     |
-| wordle-duel-service | Spring Boot API backend  | `https://dariolab.com/wordle-duel/api/` |
-| Grafana             | Observability dashboards | `https://dariolab.com/grafana/`         |
-| Headlamp            | Cluster management UI    | `https://dariolab.com/dashboard`        |
+| lab-home            | Static landing page      | `https://dariolab.com/`                  |
+| wordle-duel         | Wordle game frontend     | `https://dariolab.com/wordle-duel/`      |
+| wordle-duel-service | Spring Boot API backend  | `https://dariolab.com/wordle-duel/api/`  |
+| Grafana             | Observability dashboards | `https://dariolab.com/grafana/`          |
+| Headlamp            | Cluster management UI    | `https://dariolab.com/dashboard`         |
 
 App deployments under `apps/` are version-pinned in git and automatically bumped by Flux when a
 new stable semver tag is published to Docker Hub for the tracked first-party images.
@@ -218,4 +218,10 @@ Check outdated Helm-managed components:
 
 ```bash
 bash scripts/check-outdated-apps.sh
+```
+
+Create a temporary tunnel to access longhorn frontend:
+
+```bash
+ssh -L 8080:localhost:8080 dariolab 'kubectl -n longhorn-system port-forward svc/longhorn-frontend 8080:80'
 ```

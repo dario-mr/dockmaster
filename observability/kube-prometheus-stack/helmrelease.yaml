@@ -24,6 +24,9 @@ spec:
       enabled: false
     prometheus:
       prometheusSpec:
+        persistentVolumeClaimRetentionPolicy:
+          whenDeleted: Retain
+          whenScaled: Retain
         retention: 14d
         retentionSize: 5GB
         scrapeInterval: 60s
