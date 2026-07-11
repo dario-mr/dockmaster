@@ -76,8 +76,9 @@ infrastructure/            Namespaces, Traefik config (HelmChartConfig), middlew
 observability/             Prometheus stack, Loki, Alloy, Grafana dashboards
 apps/                      Application deployments (function-plotter, lab-home, wordle-duel, wordle-duel-service, redis)
 scripts/                   Bootstrap and operational scripts
+doc/                       Setup and operations guides
 secrets/                   Secret templates (real values git-ignored)
-docs/                      Documentation (secrets inventory, Crowdsec operations)
+docs/                      Deep-dive documentation (secrets inventory, Crowdsec, TLS, rollback)
 ```
 
 ## Stack
@@ -112,116 +113,9 @@ new stable semver tag is published to Docker Hub for the tracked first-party ima
 - GitHub Personal Access Token with write repo permissions for flux
 - Ubuntu/Debian VPS with `sudo` access for the first server
 
-## Quick Start
+## Guides
 
-1. **Clone the repo on the first server:**
-   ```bash
-   git clone https://github.com/dario-mr/dockmaster.git
-   cd dockmaster
-   ```
-
-2. **Prepare secrets:**
-   ```bash
-   cp secrets/wordle-duel-service-secrets.template.yaml secrets/wordle-duel-service-secrets.yaml
-   cp secrets/observability-secrets.template.yaml secrets/observability-secrets.yaml
-   cp secrets/crowdsec-secrets.template.yaml secrets/crowdsec-secrets.yaml
-   cp secrets/geoipupdate-secret.template.yaml secrets/geoipupdate-secret.yaml
-   # Edit secrets with real values
-   ```
-   For `wordle-duel-service`, set `WORDLE_JWT_PRIVATE_KEY_PEM` and `WORDLE_JWT_PUBLIC_KEY_PEM`
-   to the PEM contents themselves.
-
-3. **Set your domain:**
-   Update `DOMAIN` in [kustomization.yaml](clusters/production/kustomization.yaml) so it matches the
-   DNS record you created.
-
-4. **Bootstrap the first server:**
-   ```bash
-   export GITHUB_TOKEN=ghp_your_token_here
-   sudo -E bash scripts/bootstrap.sh
-   ```
-
-5. **Apply secrets:**
-   ```bash
-   sudo bash scripts/apply-secrets.sh
-   ```
-
-6. **Resume observability and apps:**
-   ```bash
-   sudo bash scripts/reconcile-apps.sh
-   ```
-
-7. **Verify:**
-   ```bash
-   sudo bash scripts/verify.sh
-   flux get kustomizations
-   kubectl get pods -A
-   ```
-
-## Join Additional Nodes
-
-Use [scripts/join-node.sh](scripts/join-node.sh) after the first server is up.
-
-- **Join an additional server node**
-  ```bash
-  sudo -E bash scripts/join-node.sh \
-    --server-url https://<first-server>:6443 \
-    --token <node-token>
-  ```
-- **Join an agent node**
-  ```bash
-  sudo -E bash scripts/join-node.sh \
-    --agent \
-    --server-url https://<first-server>:6443 \
-    --token <node-token>
-  ```
-
-Server vs. agent:
-
-- A **server** joins the control plane and, once the cluster is on embedded etcd, contributes to
-  control-plane resilience.
-- An **agent** joins only as a worker and adds workload capacity without improving control-plane
-  availability.
-
-See [docs/secrets-inventory.md](docs/secrets-inventory.md) for all required secret values.
-See [docs/crowdsec.md](docs/crowdsec.md) for Crowdsec operations and troubleshooting.
-
-## Operations
-
-```bash
-# Full post-bootstrap verification
-sudo bash scripts/verify.sh
-
-# Check Flux reconciliation status
-flux get kustomizations
-flux get image repository -A
-flux get image policy -A
-flux get image update -A
-
-# Force reconcile a layer
-flux reconcile kustomization infrastructure
-flux reconcile kustomization observability
-flux reconcile kustomization apps
-
-# Restart a workload after ConfigMap changes
-kubectl rollout restart daemonset/alloy -n observability
-
-# Check Helm release versions
-flux get helmreleases -n observability
-
-# View logs
-kubectl logs -n observability -l app.kubernetes.io/name=alloy -c alloy --tail=20
-kubectl logs -n observability -l app.kubernetes.io/name=grafana -c grafana --tail=20
-```
-
-Check outdated Helm-managed components:
-
-```bash
-bash scripts/check-outdated-apps.sh
-```
-
-Create a temporary tunnel to access longhorn frontend:
-
-```bash
-ssh -L 8080:localhost:8080 dariolab 'kubectl -n longhorn-system port-forward svc/longhorn-frontend 8080:80'
-```
+- [Getting started and node join](doc/getting-started.md)
+- [Operations](doc/operations.md)
+- [Secrets inventory](docs/secrets-inventory.md)
+- [Crowdsec operations](docs/crowdsec.md)
