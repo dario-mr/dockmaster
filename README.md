@@ -70,15 +70,14 @@ flowchart TD
 ## Structure
 
 ```
-clusters/production/       Flux Kustomizations (image automation + infrastructure → observability → apps)
-clusters/production/image-automation/ Flux image repositories, policies, and update automation
-infrastructure/            Namespaces, Traefik config (HelmChartConfig), middlewares, Crowdsec, Headlamp
-observability/             Prometheus stack, Loki, Alloy, Grafana dashboards
-apps/                      Application deployments (function-plotter, lab-home, wordle-duel, wordle-duel-service, redis)
-scripts/                   Bootstrap and operational scripts
-doc/                       Setup and operations guides
-secrets/                   Secret templates (real values git-ignored)
-docs/                      Deep-dive documentation (secrets inventory, Crowdsec, TLS, rollback)
+clusters/production/                    Flux Kustomizations (image automation + infrastructure → observability → apps)
+clusters/production/image-automation/   Flux image repositories, policies, and update automation
+infrastructure/                         Namespaces, Traefik config (HelmChartConfig), middlewares, Crowdsec, Headlamp
+observability/                          Prometheus stack, Loki, Alloy, Grafana dashboards
+apps/                                   Application deployments (function-plotter, lab-home, wordle-duel, wordle-duel-service, redis)
+scripts/                                Bootstrap and operational scripts
+docs/                                   Setup and operations guides
+secrets/                                Secret templates (real values git-ignored)
 ```
 
 ## Stack
@@ -115,7 +114,7 @@ new stable semver tag is published to Docker Hub for the tracked first-party ima
 
 ## Guides
 
-- [Getting started and node join](doc/getting-started.md)
-- [Operations](doc/operations.md)
+- [Getting started and node join](docs/getting-started.md)
+- [Operations](docs/operations.md)
 - [Secrets inventory](docs/secrets-inventory.md)
 - [Crowdsec operations](docs/crowdsec.md)
