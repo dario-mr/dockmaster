@@ -23,7 +23,7 @@ Usage:
     Join a worker-only agent node to an existing cluster.
 
 Environment overrides:
-  DOCKMASTER_K3S_VERSION                Override pinned k3s version (default: v1.33.13+k3s1)
+  DOCKMASTER_K3S_VERSION                Override pinned k3s version (default: v1.36.2+k3s1)
   DOCKMASTER_K3S_INSTALL_SCRIPT_SHA256  Override pinned k3s installer SHA256
 EOF
 }

@@ -17,9 +17,9 @@ Usage:
     Install the first server for the cluster with embedded etcd and bootstrap Flux.
 
 Environment overrides:
-  DOCKMASTER_K3S_VERSION                Override pinned k3s version (default: v1.33.13+k3s1)
+  DOCKMASTER_K3S_VERSION                Override pinned k3s version (default: v1.36.2+k3s1)
   DOCKMASTER_K3S_INSTALL_SCRIPT_SHA256  Override pinned k3s installer SHA256
-  DOCKMASTER_FLUX_VERSION               Override pinned Flux CLI version (default: v2.8.3)
+  DOCKMASTER_FLUX_VERSION               Override pinned Flux CLI version (default: v2.9.1)
 EOF
 }
 
