@@ -70,7 +70,7 @@ flowchart TD
 ## Structure
 
 ```
-clusters/production/                    Flux Kustomizations (image automation + infrastructure → observability → apps)
+clusters/production/                    Flux Kustomizations (infrastructure → observability; infrastructure → apps)
 clusters/production/image-automation/   Flux image repositories, policies, and update automation
 infrastructure/                         Namespaces, Traefik config (HelmChartConfig), middlewares, Crowdsec, Headlamp
 observability/                          Prometheus stack, Loki, Alloy, Grafana dashboards
@@ -89,7 +89,7 @@ secrets/                                Secret templates (real values git-ignore
 | [kube-prometheus-stack](https://github.com/prometheus-community/helm-charts) | Prometheus, Grafana, node-exporter, kube-state-metrics | 87.12.5       |
 | [Loki](https://grafana.com/oss/loki/)                                        | Log aggregation (SingleBinary, TSDB, 30d retention)    | 7.0.0         |
 | [Alloy](https://grafana.com/oss/alloy/)                                      | Log collection (pod logs + Traefik access logs)        | 1.10.0        |
-| [Crowdsec](https://www.crowdsec.net/)                                        | Intrusion detection + Traefik bouncer                  | 0.22.1        |
+| [Crowdsec](https://www.crowdsec.net/)                                        | Intrusion detection + Traefik bouncer                  | 0.24.0        |
 | [Headlamp](https://headlamp.dev/)                                            | Cluster web UI (token auth)                            | 0.43.0        |
 
 ## Applications
@@ -98,7 +98,7 @@ secrets/                                Secret templates (real values git-ignore
 |---------------------|--------------------------|------------------------------------------|
 | lab-home            | Static landing page      | `https://dariolab.com/`                  |
 | wordle-duel         | Wordle game frontend     | `https://dariolab.com/wordle-duel/`      |
-| wordle-duel-service | Spring Boot API backend  | `https://dariolab.com/wordle-duel/api/`  |
+| wordle-duel-service | Spring Boot API backend  | `https://dariolab.com/wordle-duel-service/` |
 | Grafana             | Observability dashboards | `https://dariolab.com/grafana/`          |
 | Headlamp            | Cluster management UI    | `https://dariolab.com/dashboard`         |
 

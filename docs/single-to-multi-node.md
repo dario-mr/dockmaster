@@ -3,10 +3,11 @@
 ## Current State
 
 The dockmaster cluster runs on a **single k3s server node** with all workloads co-located. This is a
-GitOps-managed stack using Flux CD, with a three-tier dependency chain:
+GitOps-managed stack using Flux CD, with infrastructure as the shared prerequisite:
 
 ```
-infrastructure --> observability --> apps
+infrastructure --> observability
+infrastructure --> apps
 ```
 
 Progress so far toward multi-node:

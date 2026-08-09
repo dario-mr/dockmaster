@@ -18,11 +18,14 @@ Longhorn is managed as part of the infrastructure layer and is reconciled by Flu
 2. `infrastructure/longhorn/helmrepository.yaml` points Flux at the Longhorn chart repository.
 3. `infrastructure/longhorn/helmrelease.yaml` installs Longhorn chart version `1.12.0` and
    reconciles it every 30 minutes.
-4. `infrastructure/storageclasses/longhorn.yaml` defines the Kubernetes `longhorn` StorageClass.
-5. `infrastructure/kustomization.yaml` includes these resources in the infrastructure layer.
+4. `infrastructure/longhorn/helmrelease.yaml` enables the chart-owned default `longhorn`
+   StorageClass.
+5. `infrastructure/kustomization.yaml` includes the Longhorn Helm resources in the infrastructure
+   layer; the chart is the only declarative StorageClass owner.
 
-The production Flux Kustomization applies `./infrastructure` before observability and apps. This
-ensures that the storage system and StorageClass exist before workloads request their PVCs.
+The production Flux Kustomization applies `./infrastructure` before observability and apps. Both
+layers depend on infrastructure, which ensures that the storage system and StorageClass exist before
+workloads request their PVCs.
 
 The node setup scripts install and enable `open-iscsi`/`iscsid`, which Longhorn needs for its block
 volume attachments:
@@ -85,7 +88,8 @@ The cluster currently runs on one k3s server node. Longhorn is installed and all
 and observability PVCs use it, but the configured replica count is `1` in:
 
 - `infrastructure/longhorn/helmrelease.yaml`
-- `infrastructure/storageclasses/longhorn.yaml`
+
+The Longhorn chart is the sole declarative owner of the default StorageClass.
 
 Therefore Longhorn currently provides persistent, CSI-managed storage, not protection from failure
 of the only node or its disk. A second node and a higher replica count are required for node-level
