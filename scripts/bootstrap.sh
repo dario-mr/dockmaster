@@ -73,11 +73,6 @@ log_step "Waiting for Traefik..."
 kubectl wait --for=condition=Available deployment/traefik -n kube-system --timeout=180s
 log_ok "Traefik running"
 
-# Create apps namespace (so secrets can be applied before Flux runs)
-kubectl create namespace apps --dry-run=client -o yaml | kubectl apply -f -
-kubectl create namespace observability --dry-run=client -o yaml | kubectl apply -f -
-echo "[OK] Namespaces 'apps' and 'observability' ensured"
-
 ensure_flux_cli_installed
 
 # Check GITHUB_TOKEN
@@ -87,6 +82,11 @@ if [ -z "${GITHUB_TOKEN:-}" ]; then
   echo "  export GITHUB_TOKEN=ghp_your_token_here"
   exit 1
 fi
+
+# Apply all required secrets before Flux creates the app-facing resources.
+log_step "Applying required secrets before Flux bootstrap..."
+bash "${SCRIPT_DIR}/apply-secrets.sh"
+log_ok "Required secrets applied"
 
 # Bootstrap Flux only on the first server.
 log_step "Bootstrapping Flux..."
@@ -102,7 +102,7 @@ kubectl wait --for=condition=Available deployment --all -n flux-system --timeout
 flux check --pre=false
 log_ok "Flux bootstrapped"
 
-log_step "Suspending app-facing Flux kustomizations until required secrets are applied..."
+log_step "Suspending app-facing Flux kustomizations until infrastructure is ready..."
 flux suspend kustomization observability -n flux-system || true
 flux suspend kustomization apps -n flux-system || true
 log_ok "Observability and apps kustomizations suspended"
@@ -111,10 +111,9 @@ wait_for_kustomization_ready infrastructure
 
 echo
 echo "=== Next Step Required ==="
-echo "Observability and apps are intentionally suspended until secrets are present."
-echo "1. Create and apply required secret files."
-echo "   sudo bash scripts/apply-secrets.sh"
-echo "2. Resume staged reconciliation."
+echo "Required secrets were applied before Flux bootstrap."
+echo "Observability and apps are intentionally suspended until infrastructure is ready."
+echo "1. Resume staged reconciliation."
 echo "   sudo bash scripts/reconcile-apps.sh"
 
 # Verification

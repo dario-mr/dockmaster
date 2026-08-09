@@ -4,6 +4,7 @@ trap 'echo "[ERROR] Command failed at line ${LINENO}: ${BASH_COMMAND}"' ERR
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SECRETS_DIR="$SCRIPT_DIR/../secrets"
+shopt -s nullglob
 
 echo "=== Applying Secrets ==="
 
@@ -31,8 +32,23 @@ ensure_namespaces_for_file() {
   ' "$file" | sort -u)
 }
 
+templates=("$SECRETS_DIR"/*.template.yaml)
+missing=0
+
+for template in "${templates[@]}"; do
+  file="${template%.template.yaml}.yaml"
+  if [ ! -f "$file" ]; then
+    echo "[ERROR] Missing required secret file: $(basename "$file")"
+    echo "        Create it from $(basename "$template") before continuing."
+    missing=1
+  fi
+done
+
+if ((missing)); then
+  exit 1
+fi
+
 for file in "$SECRETS_DIR"/*.yaml; do
-  # Skip templates
   if [[ "$file" == *.template.yaml ]]; then
     continue
   fi

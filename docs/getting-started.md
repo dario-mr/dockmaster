@@ -46,17 +46,15 @@ These are the main environment variables used by the bootstrap and join scripts.
    sudo -E bash scripts/bootstrap.sh
    ```
 
-5. **Apply secrets:**
-   ```bash
-   sudo bash scripts/apply-secrets.sh
-   ```
+   `bootstrap.sh` validates and applies these files before it bootstraps Flux. It fails clearly if
+   any real file is missing.
 
-6. **Resume observability and apps:**
+5. **Resume observability and apps:**
    ```bash
    sudo bash scripts/reconcile-apps.sh
    ```
 
-7. **Verify:**
+6. **Verify:**
    ```bash
    sudo bash scripts/verify.sh
    flux get kustomizations
