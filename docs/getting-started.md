@@ -10,6 +10,9 @@ These are the main environment variables used by the bootstrap and join scripts.
 |----------|---------|----------|---------|
 | `GITHUB_TOKEN` | `scripts/bootstrap.sh` | Yes | GitHub token used by `flux bootstrap github`. |
 | `K8S_API_ALLOW_CIDR` | `scripts/bootstrap.sh`, `scripts/join-node.sh` | No | Opens TCP `6443` in UFW only for the given CIDR. |
+| `K3S_CLUSTER_CIDR` | `scripts/bootstrap.sh`, `scripts/join-node.sh` | No | Pod CIDR allowed through UFW; defaults to `10.42.0.0/16`. |
+| `K3S_SERVICE_CIDR` | `scripts/bootstrap.sh`, `scripts/join-node.sh` | No | Service CIDR allowed through UFW; defaults to `10.43.0.0/16`. |
+| `K3S_TRUSTED_NODE_CIDR` | `scripts/bootstrap.sh`, `scripts/join-node.sh` | Join required | Private or WireGuard CIDR shared by cluster nodes; optional for a single-node bootstrap. |
 | `DOCKMASTER_K3S_VERSION` | `scripts/bootstrap.sh`, `scripts/join-node.sh` | No | Overrides the pinned k3s version. |
 | `DOCKMASTER_K3S_INSTALL_SCRIPT_SHA256` | `scripts/bootstrap.sh`, `scripts/join-node.sh` | No | Overrides the expected SHA256 for the pinned k3s installer script. |
 | `DOCKMASTER_FLUX_VERSION` | `scripts/bootstrap.sh` | No | Overrides the pinned Flux CLI version. |
@@ -60,6 +63,24 @@ These are the main environment variables used by the bootstrap and join scripts.
    flux get kustomizations
    kubectl get pods -A
    ```
+
+For a multi-node cluster, configure `K3S_TRUSTED_NODE_CIDR` on the existing server before joining
+another node. Use only the private or WireGuard network shared by the nodes; never use a world-open
+CIDR such as `0.0.0.0/0`. The rule is idempotent, so the existing server can be updated with:
+
+```bash
+sudo env K3S_TRUSTED_NODE_CIDR=10.0.0.0/24 bash -c 'source scripts/lib/common.sh && configure_ufw'
+```
+
+Then pass the same value when joining the new node:
+
+```bash
+export K3S_TRUSTED_NODE_CIDR=10.0.0.0/24
+sudo -E bash scripts/join-node.sh --server-url https://<first-server>:6443 --token <node-token>
+```
+
+`K8S_API_ALLOW_CIDR` is for non-node Kubernetes API clients; node-to-node traffic uses the trusted
+node CIDR.
 
 ## Join Additional Nodes
 

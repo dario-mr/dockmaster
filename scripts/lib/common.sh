@@ -5,6 +5,9 @@ DOCKMASTER_K3S_INSTALL_SCRIPT_SHA256="${DOCKMASTER_K3S_INSTALL_SCRIPT_SHA256:-46
 DOCKMASTER_FLUX_VERSION="${DOCKMASTER_FLUX_VERSION:-v2.9.1}"
 DOCKMASTER_FLUX_SHA256_AMD64="${DOCKMASTER_FLUX_SHA256_AMD64:-6e984c92aa02250ea3f907367dc7829411e31d667b100ce2005cb87d5509e5b3}"
 DOCKMASTER_FLUX_SHA256_ARM64="${DOCKMASTER_FLUX_SHA256_ARM64:-16409df2fbd40b23458d81c22dd57abd39e82450831bdf522716d9d1030976c6}"
+K3S_CLUSTER_CIDR="${K3S_CLUSTER_CIDR:-10.42.0.0/16}"
+K3S_SERVICE_CIDR="${K3S_SERVICE_CIDR:-10.43.0.0/16}"
+K3S_TRUSTED_NODE_CIDR="${K3S_TRUSTED_NODE_CIDR:-}"
 
 log_step() {
   echo "[..] $1"
@@ -61,6 +64,43 @@ allow_ufw_rule_if_missing() {
   fi
 }
 
+allow_ufw_cidr_if_missing() {
+  local cidr="$1"
+
+  if ufw status | grep -Fq "$cidr"; then
+    log_ok "ufw rule already present for traffic from $cidr"
+  else
+    log_step "Allowing traffic from $cidr through ufw..."
+    ufw allow "from" "$cidr"
+  fi
+}
+
+allow_ufw_api_rule_if_missing() {
+  local cidr="$1"
+
+  if ufw status | grep -F "$cidr" | grep -Fq "6443"; then
+    log_ok "ufw API rule already present for $cidr"
+  else
+    log_step "Allowing Kubernetes API access from $cidr through ufw..."
+    ufw allow "from" "$cidr" "to" "any" "port" "6443" "proto" "tcp"
+  fi
+}
+
+require_trusted_node_cidr() {
+  if [[ -z "$K3S_TRUSTED_NODE_CIDR" ]]; then
+    echo "[ERROR] K3S_TRUSTED_NODE_CIDR must be set before joining a node."
+    echo "        Use only the private or WireGuard CIDR shared by cluster nodes."
+    exit 1
+  fi
+
+  case "$K3S_TRUSTED_NODE_CIDR" in
+    0.0.0.0/0|::/0)
+      echo "[ERROR] K3S_TRUSTED_NODE_CIDR must not be world-open ($K3S_TRUSTED_NODE_CIDR)."
+      exit 1
+      ;;
+  esac
+}
+
 configure_ufw() {
   local rule
 
@@ -68,8 +108,18 @@ configure_ufw() {
     allow_ufw_rule_if_missing "$rule"
   done
 
+  allow_ufw_cidr_if_missing "$K3S_CLUSTER_CIDR"
+  allow_ufw_cidr_if_missing "$K3S_SERVICE_CIDR"
+
+  if [[ -n "$K3S_TRUSTED_NODE_CIDR" ]]; then
+    allow_ufw_cidr_if_missing "$K3S_TRUSTED_NODE_CIDR"
+    log_ok "Trusted cluster-node traffic enabled for $K3S_TRUSTED_NODE_CIDR"
+  else
+    echo "[OK] Trusted cluster-node traffic is not configured (single-node bootstrap)"
+  fi
+
   if [[ -n "${K8S_API_ALLOW_CIDR:-}" ]]; then
-    allow_ufw_rule_if_missing "from ${K8S_API_ALLOW_CIDR} to any port 6443 proto tcp"
+    allow_ufw_api_rule_if_missing "$K8S_API_ALLOW_CIDR"
     log_ok "Restricted Kubernetes API access enabled for ${K8S_API_ALLOW_CIDR}"
   else
     echo "[OK] Kubernetes API port 6443 remains closed in ufw by default"

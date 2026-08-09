@@ -20,6 +20,9 @@ Environment overrides:
   DOCKMASTER_K3S_VERSION                Override pinned k3s version (default: v1.36.2+k3s1)
   DOCKMASTER_K3S_INSTALL_SCRIPT_SHA256  Override pinned k3s installer SHA256
   DOCKMASTER_FLUX_VERSION               Override pinned Flux CLI version (default: v2.9.1)
+  K3S_CLUSTER_CIDR                      Pod CIDR allowed through ufw (default: 10.42.0.0/16)
+  K3S_SERVICE_CIDR                      Service CIDR allowed through ufw (default: 10.43.0.0/16)
+  K3S_TRUSTED_NODE_CIDR                 Private/WireGuard node CIDR; optional for a single node
 EOF
 }
 

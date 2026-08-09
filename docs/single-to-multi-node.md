@@ -150,6 +150,21 @@ each get their own local log reader automatically. This pattern has not been val
 nodes yet because the cluster still has only one node and still depends on the local
 `/var/log/traefik` hostPath.
 
+### Node firewall prerequisites
+
+When UFW is enabled, the scripts allow the K3s pod CIDR (`10.42.0.0/16`) and service CIDR
+(`10.43.0.0/16`) by default. Set `K3S_CLUSTER_CIDR` or `K3S_SERVICE_CIDR` if the K3s installation
+uses different ranges.
+
+Before joining another node, configure `K3S_TRUSTED_NODE_CIDR` on the existing server and use the
+same value on the joining node. It must be only the private or WireGuard network used between
+cluster nodes; never use `0.0.0.0/0` or another world-open CIDR. This one trusted-peer rule covers
+K3s overlay, kubelet, embedded-etcd, and Longhorn traffic without a manually maintained port list.
+
+The first server may omit `K3S_TRUSTED_NODE_CIDR` while it is single-node. The join script refuses
+to install until the variable is set, and repeated firewall setup is idempotent. `K8S_API_ALLOW_CIDR`
+remains reserved for non-node Kubernetes API clients.
+
 ---
 
 ## Migration Priority Order

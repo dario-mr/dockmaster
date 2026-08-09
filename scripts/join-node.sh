@@ -25,6 +25,9 @@ Usage:
 Environment overrides:
   DOCKMASTER_K3S_VERSION                Override pinned k3s version (default: v1.36.2+k3s1)
   DOCKMASTER_K3S_INSTALL_SCRIPT_SHA256  Override pinned k3s installer SHA256
+  K3S_CLUSTER_CIDR                      Pod CIDR allowed through ufw (default: 10.42.0.0/16)
+  K3S_SERVICE_CIDR                      Service CIDR allowed through ufw (default: 10.43.0.0/16)
+  K3S_TRUSTED_NODE_CIDR                 Required private/WireGuard CIDR shared by cluster nodes
 EOF
 }
 
@@ -93,6 +96,7 @@ install_k3s() {
 
 parse_args "$@"
 require_root
+require_trusted_node_cidr
 
 perform_common_node_setup "${REQUIRED_APT_PACKAGES[@]}"
 
