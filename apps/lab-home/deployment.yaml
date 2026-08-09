@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: lab-home
-          image: dariomr8/lab-home:1.0.12 # {"$imagepolicy": "flux-system:lab-home"}
+          image: dariomr8/lab-home:1.0.13 # {"$imagepolicy": "flux-system:lab-home"}
           ports:
             - containerPort: 80
           livenessProbe:
