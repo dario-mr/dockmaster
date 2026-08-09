@@ -47,15 +47,3 @@ kubectl logs -n observability -l app.kubernetes.io/name=grafana -c grafana --tai
 ```bash
 bash scripts/check-outdated-apps.sh
 ```
-
-## Longhorn UI Tunnel
-
-Create a temporary tunnel to access the Longhorn frontend:
-
-```bash
-# run on the VPS
-kubectl -n longhorn-system port-forward svc/longhorn-frontend 8080:80
-
-# run on your machine
-ssh -L 8080:localhost:8080 dariolab
-```
