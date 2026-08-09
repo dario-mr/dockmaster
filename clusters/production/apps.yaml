@@ -13,4 +13,3 @@ spec:
   wait: true
   dependsOn:
     - name: infrastructure
-    - name: observability
