@@ -54,7 +54,6 @@ default. The important persistent workloads in this repository explicitly select
 
 | Workload                        | PVC/storage                   | Manifest or configuration                                                                                    |
 |---------------------------------|-------------------------------|--------------------------------------------------------------------------------------------------------------|
-| Redis for `wordle-duel-service` | `1Gi`                         | `apps/wordle-duel-service-redis/pvc-longhorn.yaml`; mounted by the Redis Deployment with AOF enabled.        |
 | CrowdSec LAPI                   | `1Gi` data and `100Mi` config | `infrastructure/crowdsec/pvc-*-longhorn.yaml`; consumed as existing claims by the CrowdSec HelmRelease.      |
 | Prometheus                      | `10Gi`                        | `observability/kube-prometheus-stack/helmrelease.yaml`; its volume claim template uses `longhorn`.           |
 | Grafana                         | `2Gi`                         | `observability/kube-prometheus-stack/helmrelease.yaml`.                                                      |
@@ -68,9 +67,9 @@ log path is separate from Longhorn storage.
 
 Longhorn provides several practical benefits to dockmaster:
 
-- **Data survives pod replacement.** Redis data, CrowdSec state, and observability data are stored
-  outside the containers, so a Deployment or StatefulSet can be recreated without automatically
-  losing its data.
+- **Data survives pod replacement.** CrowdSec state and observability data are stored outside the
+  containers, so those workloads can be recreated without automatically losing their data. Redis is
+  intentionally ephemeral because it only holds disposable sessions, locks, and Pub/Sub state.
 - **Storage is declared with the workload.** PVCs and their storage policy live in Git and are
   applied through Flux, making storage reproducible along with the rest of the cluster.
 - **Workloads are less tied to local disks.** With more than one node, a Longhorn volume can be

@@ -18,7 +18,7 @@ spec:
       containers:
         - name: redis
           image: redis:7-alpine
-          command: ["redis-server", "--appendonly", "yes"]
+          command: ["redis-server", "--save", "", "--appendonly", "no"]
           ports:
             - containerPort: 6379
           volumeMounts:
@@ -40,5 +40,4 @@ spec:
             failureThreshold: 3
       volumes:
         - name: redis-data
-          persistentVolumeClaim:
-            claimName: wordle-duel-service-redis-data-longhorn
+          emptyDir: {}
