@@ -47,8 +47,10 @@ The `longhorn` StorageClass is the cluster default and uses Longhorn's CSI provi
 | Binding mode                  | `Immediate`      | Provisioning starts when the PVC is created.                  |
 | Replica count                 | `1`              | There is currently one Longhorn data replica per volume.      |
 
-The k3s `local-path` StorageClass remains defined for compatibility, but it is explicitly not the
-default. The important persistent workloads in this repository explicitly select `longhorn`.
+The k3s `local-path` StorageClass remains defined for workloads whose data may stay on one node.
+Longhorn-backed workloads select `longhorn` explicitly; Grafana intentionally selects `local-path`
+because its dashboards and datasources are declarative and its remaining UI state is not treated as
+node-failure-critical.
 
 ## What uses Longhorn here
 
@@ -56,8 +58,11 @@ default. The important persistent workloads in this repository explicitly select
 |---------------------------------|-------------------------------|--------------------------------------------------------------------------------------------------------------|
 | CrowdSec LAPI                   | `1Gi` data and `100Mi` config | `infrastructure/crowdsec/pvc-*-longhorn.yaml`; consumed as existing claims by the CrowdSec HelmRelease.      |
 | Prometheus                      | `10Gi`                        | `observability/kube-prometheus-stack/helmrelease.yaml`; its volume claim template uses `longhorn`.           |
-| Grafana                         | `2Gi`                         | `observability/kube-prometheus-stack/helmrelease.yaml`.                                                      |
 | Loki                            | `5Gi`                         | `observability/loki/helmrelease.yaml`; SingleBinary Loki stores data on a Longhorn-backed filesystem volume. |
+
+Grafana still has a `2Gi` PVC, but it uses `local-path` rather than Longhorn. Its loss would remove
+node-local UI state such as preferences and plugin metadata, while the repository-managed dashboards,
+datasources, and admin credentials remain reproducible.
 
 The frontend and API deployments do not currently need persistent volumes. Traefik access logs,
 CrowdSec agent input, and Alloy input also use the node-local `/var/log/traefik` `hostPath`; that
@@ -67,9 +72,10 @@ log path is separate from Longhorn storage.
 
 Longhorn provides several practical benefits to dockmaster:
 
-- **Data survives pod replacement.** CrowdSec state and observability data are stored outside the
-  containers, so those workloads can be recreated without automatically losing their data. Redis is
-  intentionally ephemeral because it only holds disposable sessions, locks, and Pub/Sub state.
+- **Data survives pod replacement.** CrowdSec state and Prometheus/Loki data are stored outside the
+  containers, so those workloads can be recreated without automatically losing their data. Grafana
+  uses node-local `local-path` storage, while Redis is intentionally ephemeral because it only holds
+  disposable sessions, locks, and Pub/Sub state.
 - **Storage is declared with the workload.** PVCs and their storage policy live in Git and are
   applied through Flux, making storage reproducible along with the rest of the cluster.
 - **Workloads are less tied to local disks.** With more than one node, a Longhorn volume can be
@@ -83,8 +89,8 @@ Longhorn provides several practical benefits to dockmaster:
 
 ## Current limitations and important expectations
 
-The cluster currently runs on one k3s server node. Longhorn is installed and all major application
-and observability PVCs use it, but the configured replica count is `1` in:
+The cluster currently runs on one k3s server node. Longhorn is installed and the durable CrowdSec and
+observability PVCs use it, but the configured replica count is `1` in:
 
 - `infrastructure/longhorn/helmrelease.yaml`
 

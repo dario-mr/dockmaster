@@ -13,7 +13,8 @@ infrastructure --> apps
 Progress so far toward multi-node:
 
 - Longhorn is installed, Git-managed, and the default StorageClass
-- Redis, Crowdsec LAPI, Grafana, Loki, and Prometheus now use Longhorn-backed PVCs
+- CrowdSec LAPI, Loki, and Prometheus use Longhorn-backed PVCs; Grafana uses a node-local `local-path`
+  PVC and Redis uses ephemeral `emptyDir` storage
 - Traefik TLS now comes from cert-manager and a shared default `TLSStore` certificate
 - The live cluster has already been converted from SQLite to embedded etcd
 - `bootstrap.sh` bootstraps the first server with embedded etcd, and `join-node.sh` adds server or
@@ -30,13 +31,13 @@ Progress so far toward multi-node:
 | Infrastructure | Crowdsec Agent        | DaemonSet   | 1*       | -                        |
 | Infrastructure | Headlamp              | Deployment  | 1        | -                        |
 | Observability  | Prometheus            | StatefulSet | 1        | 10Gi Longhorn PVC        |
-| Observability  | Grafana               | Deployment  | 1        | 2Gi Longhorn PVC         |
+| Observability  | Grafana               | Deployment  | 1        | 2Gi local-path PVC       |
 | Observability  | Loki (SingleBinary)   | StatefulSet | 1        | 5Gi Longhorn PVC         |
 | Observability  | Alloy                 | DaemonSet   | 1*       | -                        |
 | Apps           | lab-home              | Deployment  | 1        | -                        |
 | Apps           | wordle-duel           | Deployment  | 1        | -                        |
 | Apps           | wordle-duel-service   | Deployment  | 1        | -                        |
-| Apps           | Redis                 | Deployment  | 1        | 1Gi Longhorn PVC         |
+| Apps           | Redis                 | Deployment  | 1        | ephemeral `emptyDir`     |
 
 \* Alloy and Crowdsec Agent are DaemonSets — currently 1 pod each because there is only 1 node.
 
@@ -75,12 +76,15 @@ still effectively single-node only because there is currently just one server in
 
 ## What Multi-Node Requires
 
-### Finish replacing local-path with Longhorn
+### Keep storage durable where it matters
 
-[Longhorn](https://longhorn.io/) is already installed and all major app and observability PVCs are
-already on Longhorn. The default StorageClass has also been switched to Longhorn. The remaining
-future-facing task is not PVC migration anymore, but increasing Longhorn replica count once
-multiple nodes exist.
+[Longhorn](https://longhorn.io/) is already installed and the state that should survive node
+movement—CrowdSec, Prometheus, and Loki—uses Longhorn explicitly. Grafana uses `local-path` because
+its dashboards, datasources, and credentials are managed declaratively, and Redis uses ephemeral
+storage because its contents are disposable.
+
+`local-path` is node-local and is not protected from node loss. The remaining future-facing storage
+task is increasing Longhorn replica counts for the retained Longhorn PVCs once multiple nodes exist.
 
 ### Choose a multi-node ingress strategy
 
@@ -173,7 +177,7 @@ remains reserved for non-node Kubernetes API clients.
 | Step | Task                                   | Risk    | Downtime                  |
 |------|----------------------------------------|---------|---------------------------|
 | 1    | Install Longhorn alongside local-path  | Done    | None                      |
-| 2    | Migrate remaining PVCs to Longhorn     | Done    | Per-service restart       |
+| 2    | Choose durable vs node-local storage per workload | Done | Per-service restart       |
 | 3    | Switch k3s to embedded etcd            | Done    | Cluster restart           |
 | 4    | Join additional server nodes           | Low     | None                      |
 | 5    | Choose multi-node ingress strategy     | Blocked | Provider/network decision |
