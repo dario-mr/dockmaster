@@ -47,3 +47,26 @@ kubectl logs -n observability -l app.kubernetes.io/name=grafana -c grafana --tai
 ```bash
 bash scripts/check-outdated-apps.sh
 ```
+
+## Free Space Maintenance
+
+Run this on a k3s node. The default is a dry run: it reports disk usage and
+prints the cleanup commands without changing anything.
+
+```bash
+bash scripts/disk-space-cleanup.sh --dry-run
+```
+
+After reviewing the plan, run the real cleanup explicitly as root:
+
+```bash
+sudo bash scripts/disk-space-cleanup.sh --cleanup
+```
+
+The cleanup vacuums journald to `500M`, prunes unused k3s images, and cleans
+the apt cache when those tools are installed. Override the journal limit when
+needed:
+
+```bash
+sudo env JOURNAL_MAX_SIZE=1G bash scripts/disk-space-cleanup.sh --cleanup
+```
