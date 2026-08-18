@@ -26,6 +26,8 @@ spec:
       middlewares:
         - name: crowdsec-bouncer
           namespace: apps
+        - name: rate-limit-global
+          namespace: apps
         - name: dashboard-redirect
   tls:
     store:
