@@ -40,8 +40,9 @@ These are the main environment variables used by the bootstrap and join scripts.
    to the PEM contents themselves.
 
 3. **Set your domain:**
-   Update `DOMAIN` in [kustomization.yaml](../clusters/production/kustomization.yaml) so it matches
-   the DNS record you created.
+   Update `DOMAIN` and `WORDLE_DUEL_DOMAIN` in
+   [kustomization.yaml](../clusters/production/kustomization.yaml) so they match the DNS records you
+   created.
 
 4. **Bootstrap the first server:**
    ```bash

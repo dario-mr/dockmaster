@@ -10,3 +10,4 @@ spec:
     name: letsencrypt-production
   dnsNames:
     - ${DOMAIN}
+    - ${WORDLE_DUEL_DOMAIN}

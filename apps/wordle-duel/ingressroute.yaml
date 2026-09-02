@@ -1,12 +1,16 @@
 apiVersion: traefik.io/v1alpha1
 kind: Middleware
 metadata:
-  name: strip-wordle-duel
+  name: wordle-duel-cors
   namespace: apps
 spec:
-  stripPrefix:
-    prefixes:
-      - /wordle-duel
+  headers:
+    accessControlAllowMethods:
+      - GET
+      - OPTIONS
+    accessControlAllowOriginList:
+      - https://dariolab.com
+    addVaryHeader: true
 ---
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
@@ -17,14 +21,14 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`${DOMAIN}`) && PathPrefix(`/wordle-duel`)
+    - match: Host(`${WORDLE_DUEL_DOMAIN}`) && PathPrefix(`/`)
       kind: Rule
       services:
         - name: wordle-duel
           port: 80
       middlewares:
         - name: crowdsec-bouncer
-        - name: strip-wordle-duel
+        - name: wordle-duel-cors
         - name: default-headers
         - name: rate-limit-app
   tls:

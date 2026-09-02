@@ -17,3 +17,4 @@ patches:
         value:
           substitute:
             DOMAIN: dariolab.com
+            WORDLE_DUEL_DOMAIN: wordle-duel.dariolab.com

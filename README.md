@@ -97,8 +97,8 @@ secrets/                                Secret templates (real values git-ignore
 | App                 | Description              | URL                                      |
 |---------------------|--------------------------|------------------------------------------|
 | lab-home            | Static landing page      | `https://dariolab.com/`                  |
-| wordle-duel         | Wordle game frontend     | `https://dariolab.com/wordle-duel/`      |
-| wordle-duel-service | Spring Boot API backend  | `https://dariolab.com/wordle-duel-service/` |
+| wordle-duel         | Wordle game frontend     | `https://wordle-duel.dariolab.com/`      |
+| wordle-duel-service | Spring Boot API backend  | `https://wordle-duel.dariolab.com/wordle-duel-service/` |
 | Grafana             | Observability dashboards | `https://dariolab.com/grafana/`          |
 | Headlamp            | Cluster management UI    | `https://dariolab.com/dashboard`         |
 

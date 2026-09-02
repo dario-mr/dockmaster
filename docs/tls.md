@@ -4,9 +4,10 @@ This is the runtime TLS flow for requests coming into the cluster.
 
 ## Request flow
 
-When a user opens `https://dariolab.com/...`, the request reaches Traefik. Traefik checks its
-default `TLSStore`, finds the `dockmaster-tls` secret, and uses that certificate for the HTTPS
-handshake. After that, Traefik routes the request to the matching app based on the path.
+When a user opens `https://dariolab.com/...` or `https://wordle-duel.dariolab.com/...`, the request
+reaches Traefik. Traefik checks its default `TLSStore`, finds the `dockmaster-tls` secret, and uses
+that certificate for the HTTPS handshake. After that, Traefik routes the request to the matching
+app based on the host and path.
 
 `cert-manager` stays in the background and keeps the `dockmaster-tls` secret populated with a valid
 certificate.
@@ -28,4 +29,4 @@ flowchart TD
 - apps do not each need their own certificate config
 - certificates are stored in Kubernetes instead of node-local files
 - renewals are automatic
-- Traefik can serve the same certificate to all path-based apps on the same domain
+- Traefik can serve the same certificate to all configured app hosts and paths

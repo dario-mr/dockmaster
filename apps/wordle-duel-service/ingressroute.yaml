@@ -17,7 +17,7 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`${DOMAIN}`) && PathPrefix(`/wordle-duel-service`)
+    - match: Host(`${WORDLE_DUEL_DOMAIN}`) && PathPrefix(`/wordle-duel-service`)
       kind: Rule
       services:
         - name: wordle-duel-service
