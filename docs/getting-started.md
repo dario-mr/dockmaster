@@ -40,7 +40,7 @@ These are the main environment variables used by the bootstrap and join scripts.
    to the PEM contents themselves.
 
 3. **Set your domain:**
-   Update `DOMAIN`, `WORDLE_DUEL_DOMAIN`, and `GRAFANA_DOMAIN` in
+   Update `DOMAIN`, `WORDLE_DUEL_DOMAIN`, `GRAFANA_DOMAIN`, and `HEADLAMP_DOMAIN` in
    [kustomization.yaml](../clusters/production/kustomization.yaml) so they match the DNS records you
    created.
 

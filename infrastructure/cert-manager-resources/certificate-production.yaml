@@ -12,3 +12,4 @@ spec:
     - ${DOMAIN}
     - ${WORDLE_DUEL_DOMAIN}
     - ${GRAFANA_DOMAIN}
+    - ${HEADLAMP_DOMAIN}

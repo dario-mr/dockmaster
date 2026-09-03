@@ -100,7 +100,7 @@ secrets/                                Secret templates (real values git-ignore
 | wordle-duel         | Wordle game frontend     | `https://wordle-duel.dariolab.com/`      |
 | wordle-duel-service | Spring Boot API backend  | `https://wordle-duel.dariolab.com/wordle-duel-service/` |
 | Grafana             | Observability dashboards | `https://grafana.dariolab.com/`          |
-| Headlamp            | Cluster management UI    | `https://dariolab.com/dashboard`         |
+| Headlamp            | Cluster management UI    | `https://headlamp.dariolab.com/`         |
 
 App deployments under `apps/` are version-pinned in git and automatically bumped by Flux when a
 new stable semver tag is published to Docker Hub for the tracked first-party images.

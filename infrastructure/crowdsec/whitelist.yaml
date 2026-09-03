@@ -15,11 +15,11 @@ data:
         - "185.40.248.10"
   headlamp-whitelist.yaml: |
     name: crowdsecurity/headlamp-whitelist
-    description: "Whitelist Headlamp dashboard static plugin requests (expected 404s)"
+    description: "Whitelist Headlamp static plugin requests (expected 404s)"
     whitelist:
       reason: "Headlamp static plugin resources that return 404"
       expression:
-        - evt.Parsed.request startsWith '/dashboard/static-plugins/'
+        - evt.Parsed.request startsWith '/static-plugins/'
   inactive-apps-whitelist.yaml: |
     name: crowdsecurity/inactive-apps-whitelist
     description: "Whitelist health/info probes for apps not currently deployed"
