@@ -11,3 +11,4 @@ spec:
   dnsNames:
     - ${DOMAIN}
     - ${WORDLE_DUEL_DOMAIN}
+    - ${GRAFANA_DOMAIN}

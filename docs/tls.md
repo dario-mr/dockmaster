@@ -4,10 +4,10 @@ This is the runtime TLS flow for requests coming into the cluster.
 
 ## Request flow
 
-When a user opens `https://dariolab.com/...` or `https://wordle-duel.dariolab.com/...`, the request
-reaches Traefik. Traefik checks its default `TLSStore`, finds the `dockmaster-tls` secret, and uses
-that certificate for the HTTPS handshake. After that, Traefik routes the request to the matching
-app based on the host and path.
+When a user opens `https://dariolab.com/...`, `https://wordle-duel.dariolab.com/...`, or
+`https://grafana.dariolab.com/...`, the request reaches Traefik. Traefik checks its default
+`TLSStore`, finds the `dockmaster-tls` secret, and uses that certificate for the HTTPS handshake.
+After that, Traefik routes the request to the matching app based on the host and path.
 
 `cert-manager` stays in the background and keeps the `dockmaster-tls` secret populated with a valid
 certificate.

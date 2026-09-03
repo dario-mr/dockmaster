@@ -88,8 +88,7 @@ spec:
         passwordKey: admin-password
       "grafana.ini":
         server:
-          root_url: "https://${DOMAIN}/grafana/"
-          serve_from_sub_path: true
+          root_url: "https://${GRAFANA_DOMAIN}/"
       persistence:
         enabled: true
         size: 2Gi
