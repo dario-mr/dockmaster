@@ -10,6 +10,6 @@ spec:
     name: letsencrypt-production
   dnsNames:
     - ${DOMAIN}
-    - ${WORDLE_DUEL_DOMAIN}
-    - ${GRAFANA_DOMAIN}
-    - ${HEADLAMP_DOMAIN}
+    - wordle-duel.${DOMAIN}
+    - grafana.${DOMAIN}
+    - headlamp.${DOMAIN}

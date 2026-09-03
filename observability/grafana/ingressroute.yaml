@@ -7,7 +7,7 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`${GRAFANA_DOMAIN}`)
+    - match: Host(`grafana.${DOMAIN}`)
       kind: Rule
       middlewares:
         - name: crowdsec-bouncer
