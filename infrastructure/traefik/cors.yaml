@@ -1,0 +1,13 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: dariolab-cors
+  namespace: apps
+spec:
+  headers:
+    accessControlAllowMethods:
+      - GET
+      - OPTIONS
+    accessControlAllowOriginList:
+      - https://dariolab.com
+    addVaryHeader: true

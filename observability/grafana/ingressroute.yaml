@@ -12,6 +12,8 @@ spec:
       middlewares:
         - name: crowdsec-bouncer
           namespace: apps
+        - name: dariolab-cors
+          namespace: apps
         - name: rate-limit-global
           namespace: apps
       services:

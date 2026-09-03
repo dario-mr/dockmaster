@@ -10,6 +10,7 @@ resources:
   - longhorn/helmrepository.yaml
   - longhorn/helmrelease.yaml
   - traefik/helmchartconfig.yaml
+  - traefik/cors.yaml
   - traefik/default-headers.yaml
   - traefik/rate-limit.yaml
   - traefik/log-truncate-cronjob.yaml
