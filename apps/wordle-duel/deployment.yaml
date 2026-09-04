@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: wordle-duel
-          image: dariomr8/wordle-duel:0.26.1 # {"$imagepolicy": "flux-system:wordle-duel"}
+          image: dariomr8/wordle-duel:0.26.2 # {"$imagepolicy": "flux-system:wordle-duel"}
           ports:
             - containerPort: 80
           livenessProbe:
