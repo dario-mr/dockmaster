@@ -154,7 +154,7 @@ data:
 
     // Grafana
     stage.match {
-        selector = "{app=~\"grafana|kube-prometheus-stack-grafana\"}"
+        selector = "{app=~\"grafana|kube-prometheus-stack-grafana\", container=\"grafana\"}"
 
         stage.logfmt {
             mapping = {
@@ -166,6 +166,10 @@ data:
     				query  = "query",
     			}
     		}
+    }
+
+    stage.match {
+        selector = "{app=~\"grafana|kube-prometheus-stack-grafana\", container=\"grafana-sc-datasources\"}"
 
         stage.json {
             expressions = {
@@ -174,7 +178,6 @@ data:
                 msg    = "msg",
             }
         }
-
     }
 
     	// Alloy (regex instead of logfmt: Alloy emits quoted keys like "start time" that break logfmt)
