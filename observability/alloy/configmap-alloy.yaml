@@ -154,7 +154,7 @@ data:
 
     // Grafana
     stage.match {
-    		selector = "{app=~\"grafana|kube-prometheus-stack-grafana\", container=\"grafana\"}"
+        selector = "{app=~\"grafana|kube-prometheus-stack-grafana\"}"
 
         stage.logfmt {
             mapping = {
@@ -166,6 +166,14 @@ data:
     				query  = "query",
     			}
     		}
+
+        stage.json {
+            expressions = {
+                ts     = "time",
+                level  = "level",
+                msg    = "msg",
+            }
+        }
 
     }
 
