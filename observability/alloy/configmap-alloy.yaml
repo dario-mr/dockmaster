@@ -169,7 +169,7 @@ data:
     }
 
     stage.match {
-        selector = "{app=~\"grafana|kube-prometheus-stack-grafana\", container=\"grafana-sc-datasources\"}"
+        selector = "{app=~\"grafana|kube-prometheus-stack-grafana\", container=~\"grafana-sc-(datasources|dashboard)\"}"
 
         stage.json {
             expressions = {
