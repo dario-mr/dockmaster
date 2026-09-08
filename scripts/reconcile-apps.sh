@@ -7,6 +7,7 @@ REQUIRED_SECRETS=(
   "kube-system:crowdsec-bouncer-key"
   "kube-system:geoipupdate-secret"
   "observability:grafana-admin-secret"
+  "flux-system:telegram-token"
   "apps:wordle-duel-service-secrets"
 )
 

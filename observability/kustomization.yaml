@@ -5,6 +5,7 @@ resources:
   - sources/helm-repositories.yaml
   - loki/helmrelease.yaml
   - kube-prometheus-stack/helmrelease.yaml
+  - flux-notifications.yaml
   - alloy/configmap-alloy.yaml
   - alloy/helmrelease.yaml
   - grafana/ingressroute.yaml

@@ -29,6 +29,18 @@ All secrets required by the cluster.
 
 **Template:** `secrets/observability-secrets.template.yaml`
 
+## Flux notifications
+
+**Secret name:** `telegram-token` (namespace: `flux-system`)
+
+| Key     | Description        | Source             |
+|---------|--------------------|--------------------|
+| `token` | Telegram bot token | Telegram BotFather |
+
+The destination chat ID is configured in `observability/flux-notifications.yaml`.
+
+**Template:** `secrets/telegram-token.template.yaml`
+
 ## Crowdsec
 
 **Secret name:** `crowdsec-secrets` (namespace: `crowdsec`)

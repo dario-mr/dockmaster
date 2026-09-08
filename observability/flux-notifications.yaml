@@ -1,0 +1,60 @@
+apiVersion: notification.toolkit.fluxcd.io/v1beta3
+kind: Provider
+metadata:
+  name: telegram
+  namespace: flux-system
+spec:
+  type: telegram
+  channel: "1313761378"
+  secretRef:
+    name: telegram-token
+---
+apiVersion: notification.toolkit.fluxcd.io/v1beta3
+kind: Alert
+metadata:
+  name: app-deployments-ready
+  namespace: flux-system
+spec:
+  summary: "Production app deployment ready"
+  providerRef:
+    name: telegram
+  eventSeverity: info
+  inclusionList:
+    - "^Health check passed"
+  eventSources:
+    - kind: Kustomization
+      name: apps
+      namespace: flux-system
+---
+apiVersion: notification.toolkit.fluxcd.io/v1beta3
+kind: Alert
+metadata:
+  name: app-deployments-failed
+  namespace: flux-system
+spec:
+  summary: "Production app deployment failed"
+  providerRef:
+    name: telegram
+  eventSeverity: error
+  eventSources:
+    - kind: Kustomization
+      name: apps
+      namespace: flux-system
+---
+apiVersion: notification.toolkit.fluxcd.io/v1beta3
+kind: Alert
+metadata:
+  name: image-updates
+  namespace: flux-system
+spec:
+  summary: "Production app image update"
+  providerRef:
+    name: telegram
+  eventSeverity: info
+  # Image automation emits this prefix only when it pushes a new commit.
+  inclusionList:
+    - "^pushed commit"
+  eventSources:
+    - kind: ImageUpdateAutomation
+      name: apps
+      namespace: flux-system

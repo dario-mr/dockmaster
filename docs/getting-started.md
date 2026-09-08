@@ -28,21 +28,35 @@ These are the main environment variables used by the bootstrap and join scripts.
    cd dockmaster
    ```
 
-2. **Prepare secrets:**
+2. **Prepare secrets before bootstrapping:**
    ```bash
    cp secrets/wordle-duel-service-secrets.template.yaml secrets/wordle-duel-service-secrets.yaml
    cp secrets/observability-secrets.template.yaml secrets/observability-secrets.yaml
+   cp secrets/telegram-token.template.yaml secrets/telegram-token.yaml
    cp secrets/crowdsec-secrets.template.yaml secrets/crowdsec-secrets.yaml
    cp secrets/geoipupdate-secret.template.yaml secrets/geoipupdate-secret.yaml
    # Edit secrets with real values
    ```
+   Create a Telegram bot with BotFather, put its token in `secrets/telegram-token.yaml`, and set the
+   destination chat ID in [flux-notifications.yaml](../observability/flux-notifications.yaml).
    For `wordle-duel-service`, set `WORDLE_JWT_PRIVATE_KEY_PEM` and `WORDLE_JWT_PUBLIC_KEY_PEM`
    to the PEM contents themselves.
 
-3. **Set your domain:**
+   The real `*.yaml` files are git-ignored. For a new cluster, create and fill them before running
+   `bootstrap.sh`; the bootstrap script applies them before Flux starts reconciling. For an existing
+   cluster, apply the Telegram secret before Flux sees the notification manifests:
+
+   ```bash
+   kubectl apply -f secrets/telegram-token.yaml
+   ```
+
+   This secret is independent of Git and must be created on the cluster host.
+
+3. **Set your domain and Telegram destination:**
    Update `DOMAIN` in
    [kustomization.yaml](../clusters/production/kustomization.yaml) so they match the DNS records you
-   created.
+   created. Also set `channel` in [flux-notifications.yaml](../observability/flux-notifications.yaml)
+   to your Telegram chat ID.
 
 4. **Bootstrap the first server:**
    ```bash
