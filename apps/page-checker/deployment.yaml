@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: page-checker
-          image: dariomr8/page-checker:0.1.1 # {"$imagepolicy": "flux-system:page-checker"}
+          image: dariomr8/page-checker:0.1.2 # {"$imagepolicy": "flux-system:page-checker"}
           ports:
             - containerPort: 8084
           env:
