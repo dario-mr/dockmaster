@@ -74,7 +74,7 @@ clusters/production/                    Flux Kustomizations (infrastructure → 
 clusters/production/image-automation/   Flux image repositories, policies, and update automation
 infrastructure/                         Namespaces, Traefik config (HelmChartConfig), middlewares, Crowdsec, Headlamp
 observability/                          Prometheus stack, Loki, Alloy, Grafana dashboards
-apps/                                   Application deployments (lab-home, wordle-duel, wordle-duel-service, redis)
+apps/                                   Application deployments (page-checker, lab-home, wordle-duel, wordle-duel-service, redis)
 scripts/                                Bootstrap and operational scripts
 docs/                                   Setup and operations guides
 secrets/                                Secret templates (real values git-ignored)
@@ -96,6 +96,7 @@ secrets/                                Secret templates (real values git-ignore
 
 | App                 | Description              | URL                                      |
 |---------------------|--------------------------|------------------------------------------|
+| page-checker        | Background page checker  | —                                        |
 | lab-home            | Static landing page      | `https://dariolab.com/`                  |
 | wordle-duel         | Wordle game frontend     | `https://wordle-duel.dariolab.com/`      |
 | wordle-duel-service | Spring Boot API backend  | `https://wordle-duel.dariolab.com/wordle-duel-service/` |

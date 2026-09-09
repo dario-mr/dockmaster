@@ -8,6 +8,7 @@ REQUIRED_SECRETS=(
   "kube-system:geoipupdate-secret"
   "observability:grafana-admin-secret"
   "flux-system:telegram-token"
+  "apps:page-checker-secrets"
   "apps:wordle-duel-service-secrets"
 )
 

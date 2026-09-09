@@ -109,7 +109,7 @@ data:
         // Filter targets before tailing them; the process pipeline only handles parsing.
         rule {
             source_labels = ["app"]
-            regex         = "^(grafana|kube-prometheus-stack-grafana|prometheus|kube-prometheus-stack-prometheus|alloy|wordle-duel-service|wordle-duel-service-redis)$"
+            regex         = "^(grafana|kube-prometheus-stack-grafana|prometheus|kube-prometheus-stack-prometheus|alloy|page-checker|wordle-duel-service|wordle-duel-service-redis)$"
             action        = "keep"
         }
 
@@ -201,7 +201,7 @@ data:
 
     	// JSON apps (Spring Boot)
     	stage.match {
-    		selector = "{app=~\"wordle-duel-service\"}"
+        selector = "{app=~\"page-checker|wordle-duel-service\"}"
 
             // Keep non-JSON lines intact before the JSON parser runs.
             stage.template {

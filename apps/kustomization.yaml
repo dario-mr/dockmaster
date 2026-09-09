@@ -1,6 +1,7 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
+  - page-checker/deployment.yaml
   - lab-home/deployment.yaml
   - lab-home/service.yaml
   - lab-home/ingressroute.yaml

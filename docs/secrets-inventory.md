@@ -2,6 +2,17 @@
 
 All secrets required by the cluster.
 
+## Page checker
+
+**Secret name:** `page-checker-secrets` (namespace: `apps`)
+
+| Key              | Description                      | Source                  |
+|------------------|----------------------------------|-------------------------|
+| `SENDER_PASSWORD` | Sender email password/app password | Email provider          |
+| `RECIPIENTS`      | Comma-separated recipient emails | Application configuration |
+
+**Template:** `secrets/page-checker-secrets.template.yaml`
+
 ## wordle-duel-service
 
 **Secret name:** `wordle-duel-service-secrets` (namespace: `apps`)

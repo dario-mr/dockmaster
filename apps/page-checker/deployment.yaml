@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: page-checker
+  namespace: apps
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: page-checker
+  template:
+    metadata:
+      labels:
+        app: page-checker
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: "/actuator/prometheus"
+        prometheus.io/port: "8084"
+    spec:
+      containers:
+        - name: page-checker
+          image: dariomr8/page-checker:0.1.0 # {"$imagepolicy": "flux-system:page-checker"}
+          ports:
+            - containerPort: 8084
+          env:
+            - name: VISA_JOB_ACTIVE
+              value: "true"
+          envFrom:
+            - secretRef:
+                name: page-checker-secrets
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8084
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8084
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3

@@ -31,6 +31,7 @@ These are the main environment variables used by the bootstrap and join scripts.
 2. **Prepare secrets before bootstrapping:**
    ```bash
    cp secrets/wordle-duel-service-secrets.template.yaml secrets/wordle-duel-service-secrets.yaml
+   cp secrets/page-checker-secrets.template.yaml secrets/page-checker-secrets.yaml
    cp secrets/observability-secrets.template.yaml secrets/observability-secrets.yaml
    cp secrets/telegram-token.template.yaml secrets/telegram-token.yaml
    cp secrets/crowdsec-secrets.template.yaml secrets/crowdsec-secrets.yaml
