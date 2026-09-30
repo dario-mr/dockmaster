@@ -9,6 +9,7 @@ resources:
   - wordle-duel-service/service.yaml
   - wordle-duel-service/configmap.yaml
   - wordle-duel-service/ingressroute.yaml
+  - wordle-duel-service/load-test-ingressroute.yaml
   - wordle-duel-service-redis/deployment.yaml
   - wordle-duel-service-redis/service.yaml
   - wordle-duel/deployment.yaml

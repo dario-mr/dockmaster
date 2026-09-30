@@ -1,0 +1,45 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: wordle-duel-load-test-ip-allowlist
+  namespace: apps
+spec:
+  ipAllowList:
+    sourceRange:
+      # laptop's public IPv4
+      - 86.49.252.100/32
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: strip-wordle-duel-load-test
+  namespace: apps
+spec:
+  stripPrefix:
+    prefixes:
+      - /_load-test
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: wordle-duel-service-load-test
+  namespace: apps
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`wordle-duel.${DOMAIN}`) && PathPrefix(`/_load-test/wordle-duel-service`)
+      kind: Rule
+      services:
+        - name: wordle-duel-service
+          port: 8088
+      middlewares:
+        - name: wordle-duel-load-test-ip-allowlist
+        - name: crowdsec-bouncer
+        - name: strip-wordle-duel-load-test
+        - name: strip-wordle-duel-service
+        - name: default-headers
+  tls:
+    store:
+      name: default
+      namespace: kube-system
