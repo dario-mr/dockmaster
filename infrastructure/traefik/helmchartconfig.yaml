@@ -15,8 +15,6 @@ spec:
     deployment:
       kind: Deployment
       replicas: 1
-      strategy:
-        type: Recreate
       additionalVolumes:
         - name: plugins-storage
           emptyDir: {}
@@ -27,6 +25,8 @@ spec:
         - name: crowdsec-bouncer-key
           secret:
             secretName: crowdsec-bouncer-key
+    updateStrategy:
+      type: Recreate
     additionalVolumeMounts:
       - name: plugins-storage
         mountPath: /plugins-storage
@@ -41,7 +41,8 @@ spec:
       websecure:
         hostPort: 443
     service:
-      type: ClusterIP
+      spec:
+        type: ClusterIP
     ingressRoute:
       dashboard:
         enabled: false
