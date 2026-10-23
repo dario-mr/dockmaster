@@ -87,7 +87,7 @@ secrets/                                Secret templates (real values git-ignore
 | [Flux](https://fluxcd.io/)                                                   | GitOps continuous delivery + image automation          | v2            |
 | [Traefik](https://traefik.io/)                                               | Ingress controller (bundled with k3s)                  | k3s-managed   |
 | [kube-prometheus-stack](https://github.com/prometheus-community/helm-charts) | Prometheus, Grafana, node-exporter, kube-state-metrics | 92.11.0       |
-| [Loki](https://grafana.com/oss/loki/)                                        | Log aggregation (SingleBinary, TSDB, 30d retention)    | 7.0.0         |
+| [Loki](https://grafana.com/oss/loki/)                                        | Log aggregation (SingleBinary, TSDB, 30d retention)    | 7.5.0         |
 | [Alloy](https://grafana.com/oss/alloy/)                                      | Log collection (pod logs + Traefik access logs)        | 1.14.3        |
 | [Crowdsec](https://www.crowdsec.net/)                                        | Intrusion detection + Traefik bouncer                  | 0.24.2        |
 | [Headlamp](https://headlamp.dev/)                                            | Cluster web UI (token auth)                            | 0.46.0        |
