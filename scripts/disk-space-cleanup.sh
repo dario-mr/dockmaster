@@ -72,7 +72,7 @@ fi
 
 if command -v k3s >/dev/null 2>&1; then
   print_header "Prune Unused K3s Images"
-  run_cleanup k3s crictl rmi --prune || true
+  run_cleanup k3s crictl --timeout=60s rmi --prune
 fi
 
 if command -v apt-get >/dev/null 2>&1; then
