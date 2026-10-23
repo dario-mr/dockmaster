@@ -13,8 +13,8 @@ These are the main environment variables used by the bootstrap and join scripts.
 | `K3S_CLUSTER_CIDR` | `scripts/bootstrap.sh`, `scripts/join-node.sh` | No | Pod CIDR allowed through UFW; defaults to `10.42.0.0/16`. |
 | `K3S_SERVICE_CIDR` | `scripts/bootstrap.sh`, `scripts/join-node.sh` | No | Service CIDR allowed through UFW; defaults to `10.43.0.0/16`. |
 | `K3S_TRUSTED_NODE_CIDR` | `scripts/bootstrap.sh`, `scripts/join-node.sh` | Join required | Private or WireGuard CIDR shared by cluster nodes; optional for a single-node bootstrap. |
-| `DOCKMASTER_K3S_VERSION` | `scripts/bootstrap.sh`, `scripts/join-node.sh` | No | Overrides the pinned k3s version. |
-| `DOCKMASTER_K3S_INSTALL_SCRIPT_SHA256` | `scripts/bootstrap.sh`, `scripts/join-node.sh` | No | Overrides the expected SHA256 for the pinned k3s installer script. |
+| `DOCKMASTER_K3S_VERSION` | bootstrap, join, and upgrade scripts | No | Overrides the pinned k3s version. |
+| `DOCKMASTER_K3S_INSTALL_SCRIPT_SHA256` | bootstrap, join, and upgrade scripts | No | Overrides the expected SHA256 for the pinned k3s installer script. |
 | `DOCKMASTER_FLUX_VERSION` | `scripts/bootstrap.sh` | No | Overrides the pinned Flux CLI version. |
 | `K3S_SERVER_URL` | `scripts/join-node.sh` | No | Alternative to `--server-url` for the server or agent join target. |
 | `K3S_TOKEN` | `scripts/join-node.sh` | No | Alternative to `--token` for the join token. |

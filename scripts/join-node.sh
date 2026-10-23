@@ -23,7 +23,7 @@ Usage:
     Join a worker-only agent node to an existing cluster.
 
 Environment overrides:
-  DOCKMASTER_K3S_VERSION                Override pinned k3s version (default: v1.36.2+k3s1)
+  DOCKMASTER_K3S_VERSION                Override pinned k3s version (default: v1.37.1+k3s1)
   DOCKMASTER_K3S_INSTALL_SCRIPT_SHA256  Override pinned k3s installer SHA256
   K3S_CLUSTER_CIDR                      Pod CIDR allowed through ufw (default: 10.42.0.0/16)
   K3S_SERVICE_CIDR                      Service CIDR allowed through ufw (default: 10.43.0.0/16)
@@ -85,7 +85,7 @@ install_k3s() {
   fi
 
   if systemctl is-enabled "$install_type" >/dev/null 2>&1 || systemctl is-active "$install_type" >/dev/null 2>&1; then
-    log_ok "$install_type ${DOCKMASTER_K3S_VERSION} already installed"
+    log_ok "$install_type service already present; the pinned version applies to new installs"
     return
   fi
 
