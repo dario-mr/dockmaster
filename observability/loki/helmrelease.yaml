@@ -32,6 +32,7 @@ spec:
         type: filesystem
       limits_config:
         retention_period: 720h
+        max_query_series: 10000
       compactor:
         working_directory: /var/loki/compactor
         retention_enabled: true
