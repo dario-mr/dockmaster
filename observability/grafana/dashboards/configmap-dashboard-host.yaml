@@ -1516,6 +1516,108 @@ data:
           "type": "timeseries"
         },
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "description": "Average vCPU time taken by the hypervisor.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 27,
+                "gradientMode": "scheme",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 3,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "#EAB839",
+                    "value": 10
+                  },
+                  {
+                    "color": "red",
+                    "value": 20
+                  }
+                ]
+              },
+              "unit": "percent"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 12,
+            "x": 0,
+            "y": 17
+          },
+          "id": 282,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": false,
+              "width": 250
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "10.4.5",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "avg by (instance) (rate(node_cpu_seconds_total{mode=\"steal\", instance=~\"$instance\"}[$__rate_interval])) * 100",
+              "format": "time_series",
+              "hide": false,
+              "refId": "A"
+            }
+          ],
+          "title": "CPU Steal",
+          "type": "timeseries"
+        },
+        {
           "collapsed": false,
           "datasource": {
             "type": "loki",
@@ -1525,7 +1627,7 @@ data:
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 17
+            "y": 24
           },
           "id": 264,
           "panels": [],
@@ -1724,7 +1826,7 @@ data:
             "h": 7,
             "w": 12,
             "x": 0,
-            "y": 18
+            "y": 25
           },
           "id": 74,
           "options": {
@@ -1834,7 +1936,7 @@ data:
             "h": 7,
             "w": 12,
             "x": 12,
-            "y": 18
+            "y": 25
           },
           "id": 152,
           "options": {
@@ -1932,7 +2034,7 @@ data:
             "h": 6,
             "w": 12,
             "x": 0,
-            "y": 25
+            "y": 32
           },
           "id": 280,
           "options": {
@@ -1974,7 +2076,7 @@ data:
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 31
+            "y": 38
           },
           "id": 265,
           "panels": [],
@@ -2072,7 +2174,7 @@ data:
             "h": 12,
             "w": 12,
             "x": 0,
-            "y": 32
+            "y": 39
           },
           "id": 3,
           "options": {
@@ -2274,7 +2376,7 @@ data:
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 32
+            "y": 39
           },
           "id": 156,
           "options": {
@@ -2378,7 +2480,7 @@ data:
             "h": 12,
             "w": 12,
             "x": 0,
-            "y": 44
+            "y": 51
           },
           "id": 24,
           "options": {
@@ -2586,7 +2688,7 @@ data:
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 44
+            "y": 51
           },
           "id": 160,
           "options": {
@@ -2809,7 +2911,7 @@ data:
             "h": 12,
             "w": 12,
             "x": 0,
-            "y": 56
+            "y": 63
           },
           "id": 84,
           "options": {
@@ -3257,7 +3359,7 @@ data:
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 56
+            "y": 63
           },
           "id": 229,
           "options": {
@@ -3485,7 +3587,7 @@ data:
             "h": 12,
             "w": 12,
             "x": 0,
-            "y": 68
+            "y": 75
           },
           "id": 42,
           "options": {
@@ -3631,7 +3733,7 @@ data:
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 68
+            "y": 75
           },
           "id": 127,
           "options": {
@@ -3680,7 +3782,7 @@ data:
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 80
+            "y": 87
           },
           "id": 269,
           "panels": [
@@ -4751,7 +4853,7 @@ data:
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 81
+            "y": 88
           },
           "id": 270,
           "panels": [],
@@ -5165,7 +5267,7 @@ data:
             "h": 10,
             "w": 12,
             "x": 0,
-            "y": 82
+            "y": 89
           },
           "id": 9,
           "options": {
@@ -5611,7 +5713,7 @@ data:
             "h": 10,
             "w": 12,
             "x": 12,
-            "y": 82
+            "y": 89
           },
           "id": 33,
           "options": {
@@ -6059,7 +6161,7 @@ data:
             "h": 10,
             "w": 12,
             "x": 0,
-            "y": 92
+            "y": 99
           },
           "id": 37,
           "options": {
@@ -6476,7 +6578,7 @@ data:
             "h": 10,
             "w": 12,
             "x": 12,
-            "y": 92
+            "y": 99
           },
           "id": 66,
           "options": {
@@ -6900,7 +7002,7 @@ data:
             "h": 10,
             "w": 12,
             "x": 0,
-            "y": 102
+            "y": 109
           },
           "id": 34,
           "options": {
@@ -6947,7 +7049,7 @@ data:
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 112
+            "y": 119
           },
           "id": 271,
           "panels": [
@@ -7490,7 +7592,7 @@ data:
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 113
+            "y": 120
           },
           "id": 272,
           "panels": [
@@ -8709,7 +8811,7 @@ data:
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 114
+            "y": 121
           },
           "id": 273,
           "panels": [
@@ -9232,7 +9334,7 @@ data:
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 115
+            "y": 122
           },
           "id": 275,
           "panels": [
@@ -9891,7 +9993,7 @@ data:
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 116
+            "y": 123
           },
           "id": 277,
           "panels": [
@@ -10578,7 +10680,7 @@ data:
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 117
+            "y": 124
           },
           "id": 279,
           "panels": [

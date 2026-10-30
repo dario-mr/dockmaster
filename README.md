@@ -114,6 +114,7 @@ new stable semver tag is published to Docker Hub for the tracked first-party ima
 
 ## Guides
 
+- [New VPS host runbook](docs/new-vps-host.md)
 - [Getting started and node join](docs/getting-started.md)
 - [Operations](docs/operations.md)
 - [Secrets inventory](docs/secrets-inventory.md)
