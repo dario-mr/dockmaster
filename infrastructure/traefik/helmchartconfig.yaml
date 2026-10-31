@@ -11,6 +11,8 @@ spec:
       - "--accesslog.filepath=/var/log/traefik/access.log"
       - "--experimental.plugins.bouncer.modulename=github.com/maxlerebourg/crowdsec-bouncer-traefik-plugin"
       - "--experimental.plugins.bouncer.version=v1.4.1"
+      # Let Kubernetes retry startup if the required plugin cannot be downloaded or loaded.
+      - "--experimental.abortonpluginfailure=true"
       - "--providers.kubernetescrd.allowCrossNamespace=true"
     deployment:
       kind: Deployment

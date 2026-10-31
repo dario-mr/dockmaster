@@ -19,6 +19,40 @@ spec:
         kind: HelmRepository
         name: crowdsec
         namespace: flux-system
+  postRenderers:
+    - kustomize:
+        patches:
+          - target:
+              kind: DaemonSet
+              name: crowdsec-agent
+            patch: |
+              apiVersion: apps/v1
+              kind: DaemonSet
+              metadata:
+                name: crowdsec-agent
+              spec:
+                template:
+                  spec:
+                    initContainers:
+                      - name: wait-for-lapi-and-register
+                        command:
+                          - sh
+                          - -ec
+                          - |
+                            until nc "$LAPI_HOST" "$LAPI_PORT" -z; do
+                              echo waiting for lapi to start
+                              sleep 5
+                            done
+                            ln -s /staging/etc/crowdsec /etc/crowdsec
+                            if [ -s /tmp_config/local_api_credentials.yaml ]; then
+                              cp /tmp_config/local_api_credentials.yaml /etc/crowdsec/local_api_credentials.yaml
+                              cscli lapi status
+                            else
+                              # A lost emptyDir must not collide with the pod's previous registration.
+                              cscli lapi register --machine "$USERNAME-$(cat /proc/sys/kernel/random/uuid)" -u "$LAPI_URL" --token "$REGISTRATION_TOKEN"
+                              cp /etc/crowdsec/local_api_credentials.yaml /tmp_config/local_api_credentials.yaml.tmp
+                              mv /tmp_config/local_api_credentials.yaml.tmp /tmp_config/local_api_credentials.yaml
+                            fi
   values:
     container_runtime: containerd
 

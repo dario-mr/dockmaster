@@ -27,6 +27,32 @@ Internet --> Traefik (bouncer plugin) --query--> Crowdsec LAPI
 
 ## Health Checks
 
+### Recovery after a VPS reboot
+
+Traefik requires the bouncer plugin to load successfully
+(`--experimental.abortonpluginfailure=true`). If the plugin download fails while
+networking starts, Traefik exits and Kubernetes retries with backoff. It cannot
+remain Ready with every protected route disabled. Recovery still requires the
+plugin registry to become reachable; this does not provide offline startup.
+
+The CrowdSec HelmRelease patches the chart's agent registration init container:
+it reuses credentials from the pod's `emptyDir` and verifies LAPI authentication.
+If credentials were lost, it registers with a unique machine name and saves the
+credentials atomically. This avoids the chart's `user already exist` failure when
+the same pod starts again after a reboot. LAPI unavailability or authentication
+failure keeps the init container retrying rather than starting an unauthenticated
+agent. Existing but revoked credentials require operator repair.
+
+After changing the CrowdSec chart version, run the recovery tests and verify that
+the post-renderer still patches `wait-for-lapi-and-register` in `crowdsec-agent`:
+
+```bash
+uv run --with pyyaml python tests/test_reboot_recovery.py
+```
+
+These settings restore services once the VPS and its storage/network return;
+they cannot restart a powered-off VPS or provide availability during a host outage.
+
 ```bash
 # Pods running
 kubectl -n crowdsec get pods
